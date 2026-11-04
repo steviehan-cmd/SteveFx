@@ -30,14 +30,15 @@ header h1 span{color:var(--acc)}
 .seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-size:14px;font-weight:600;color:var(--muted)}
 .seg button.on{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
 #hBtn{border:0;background:var(--acc-soft);color:var(--acc);font-weight:700;font-size:14px;padding:7px 12px;border-radius:9px}
-#status{display:flex;align-items:center;gap:8px;padding:2px 14px 8px;font-size:12.5px;color:var(--muted)}
-#status .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
-#status .dot.on{background:var(--up)}
-#status button{margin-left:auto;border:0;background:transparent;color:var(--acc);font-weight:700;font-size:13px;padding:4px 2px}
-#status button.spin{opacity:.5}
+.statusline{display:flex;align-items:center;gap:8px;padding:2px 14px 8px;font-size:12.5px;color:var(--muted)}
+.statusline .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
+.statusline .dot.on{background:var(--up)}
+.statusline button{margin-left:auto;border:0;background:transparent;color:var(--acc);font-weight:700;font-size:13px;padding:4px 2px}
+.statusline button.spin{opacity:.5}
 main{flex:1;overflow-y:auto;padding:0 12px 12px;-webkit-overflow-scrolling:touch}
 .row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid transparent;border-radius:14px;padding:11px 12px;margin-bottom:7px;box-shadow:var(--shadow)}
 .row.active{border-color:var(--acc);background:var(--acc-soft)}
+.row.dim{opacity:.45}
 .flag{font-size:26px;line-height:1;width:32px;text-align:center;flex:none}
 .cc{min-width:0;flex:none;max-width:42%}
 .cc b{display:block;font-size:16px}
@@ -54,41 +55,44 @@ main{flex:1;overflow-y:auto;padding:0 12px 12px;-webkit-overflow-scrolling:touch
 .empty b{color:var(--text)}
 .pos{color:var(--up);font-weight:700}.neg{color:var(--down);font-weight:700}
 .hidden{display:none!important}
-/* custom mode: rate bar + "Your custom rates" list with swipe actions */
-#rbar{display:flex;align-items:center;gap:6px;width:calc(100% - 24px);margin:0 12px 9px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:14px;font-weight:700;text-align:left;box-shadow:var(--shadow)}
-#rbar .pair{white-space:nowrap;flex:none}
-#rbar small{color:var(--muted);font-weight:500;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-#rbar .dd{margin-left:auto;color:var(--acc);flex:none;padding-left:4px}
-#rList{flex:1;overflow-y:auto}
+/* "Your custom rates" list: swipe left or long-press for Edit/Delete */
+#rList{flex:1;overflow-y:auto;-webkit-touch-callout:none}
 .sw{position:relative;overflow:hidden;border-radius:14px;margin-bottom:7px}
 .sw .acts{position:absolute;right:0;top:0;bottom:0;display:flex;visibility:hidden}
 .sw.open .acts{visibility:visible}
 .sw .acts button{border:0;width:72px;font-weight:700;font-size:14px;color:#fff}
 .sw .acts .e{background:#64748b}.sw .acts .d{background:#dc2626}
 .sw .row{margin:0;position:relative;background:var(--bg);touch-action:pan-y;transition:transform .2s}
-.sw .row.active{background:var(--acc-soft)}
 .sw.drag .row{transition:none}
 .hint{color:var(--muted);font-size:12px;text-align:center;margin:4px 0 10px}
 .mktline{font-size:13px;color:var(--muted);margin:-4px 0 12px;line-height:1.45}
 .mktline:empty{display:none}
-/* keypad: a raised tray */
-#pad{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:50px;gap:6px;padding:20px 10px calc(10px + env(safe-area-inset-bottom));background:var(--tray);border-radius:24px 24px 0 0;box-shadow:var(--tshadow);position:relative;z-index:1}
-#pad::before{content:"";position:absolute;top:8px;left:50%;width:38px;height:4px;margin-left:-19px;border-radius:2px;background:var(--handle)}
-#pad button{border:0;border-radius:12px;background:var(--tkey);font-size:22px;touch-action:manipulation}
-#pad button:active{filter:brightness(.9)}
-@media (prefers-color-scheme:dark){#pad button:active{filter:brightness(1.35)}}
-#pad .op{background:var(--tkey2);color:var(--acc);font-weight:600}
-#pad .eq{grid-row:span 2;background:var(--acc);color:var(--on-acc);font-weight:700}
+.mktline.warn{color:var(--text);margin:0 0 12px}
+/* keypad: a raised tray; tap or drag the handle to slide it down/up */
+#pad{background:var(--tray);border-radius:24px 24px 0 0;box-shadow:var(--tshadow);position:relative;z-index:1;padding:0 10px env(safe-area-inset-bottom);transition:padding .25s ease}
+#pad.collapsed{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+#padHandle{display:block;width:100%;height:24px;border:0;background:transparent;padding:0;position:relative;touch-action:none}
+#padHandle::before{content:"";position:absolute;top:9px;left:50%;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:var(--handle)}
+#keys{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:50px;gap:6px;padding-bottom:10px;max-height:284px;overflow:hidden;transition:max-height .25s ease,padding .25s ease}
+#pad.collapsed #keys{max-height:0;padding-bottom:0}
+#keys.drag{transition:none}
+#keys button{border:0;border-radius:12px;background:var(--tkey);font-size:22px;touch-action:manipulation}
+#keys button:active{filter:brightness(.9)}
+@media (prefers-color-scheme:dark){#keys button:active{filter:brightness(1.35)}}
+#keys .op{background:var(--tkey2);color:var(--acc);font-weight:600}
+#keys .eq{grid-row:span 2;background:var(--acc);color:var(--on-acc);font-weight:700}
 /* sheets */
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:10}
 .sheet.hidden{display:none}
 .sheet-card{background:var(--card);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:92dvh;overflow-y:auto}
 .sheet-card.tall{height:85dvh;display:flex;flex-direction:column}
 .sheet-card h3{margin:0 0 12px;font-size:18px}
-.sheet label{display:block;font-size:13px;color:var(--muted);margin-bottom:10px}
+.sheet label,.fld{display:block;font-size:13px;color:var(--muted);margin-bottom:10px}
 .sheet input,.sheet select{display:block;width:100%;margin-top:4px;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:17px}
 .two{display:flex;gap:8px;align-items:flex-end}
-.two label{flex:1}
+.two label,.two .fld{flex:1;min-width:0}
+.cur{display:flex;align-items:center;gap:6px;width:100%;margin-top:4px;padding:11px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:17px;text-align:left;white-space:nowrap;overflow:hidden}
+.cur small{color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .swap{border:0;background:var(--key2);border-radius:10px;width:44px;height:46px;margin-bottom:10px;font-size:18px;flex:none}
 .link{border:0;background:transparent;color:var(--acc);font-weight:700;font-size:14px;padding:0 0 12px}
 details{margin-bottom:10px;font-size:14px}
@@ -112,25 +116,29 @@ summary{color:var(--acc);font-weight:700;padding:2px 0 10px}
   <div class="seg"><button data-mode="latest">Latest</button><button data-mode="custom">Custom</button></div>
   <button id="hBtn">Edit</button>
 </header>
-<div id="status"><span class="dot" id="dot"></span><span id="stamp">No rates yet</span><button id="refresh">↻ Refresh</button></div>
-<button id="rbar" class="hidden"></button>
+<div id="status" class="statusline"><span class="dot" id="dot"></span><span id="stamp">No rates yet</span><button id="refresh">↻ Refresh</button></div>
+<div id="cstatus" class="statusline hidden"><span id="cstamp"></span><button id="manage">Manage</button></div>
 <main id="list"></main>
 <div id="pad">
-  <button class="op" data-k="C">C</button><button class="op" data-k="⌫">⌫</button><button class="op" data-k="÷">÷</button><button class="op" data-k="×">×</button>
-  <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="−">−</button>
-  <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="+">+</button>
-  <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="eq" data-k="=">=</button>
-  <button data-k="00">00</button><button data-k="0">0</button><button data-k=".">.</button>
+  <button id="padHandle" aria-label="Show or hide keypad"></button>
+  <div id="keys">
+    <button class="op" data-k="C">C</button><button class="op" data-k="⌫">⌫</button><button class="op" data-k="÷">÷</button><button class="op" data-k="×">×</button>
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="−">−</button>
+    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="+">+</button>
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="eq" data-k="=">=</button>
+    <button data-k="00">00</button><button data-k="0">0</button><button data-k=".">.</button>
+  </div>
 </div>
 
 <div id="sheet" class="sheet hidden">
   <div class="sheet-card">
     <h3 id="sTitle">Add custom rate</h3>
     <div class="two">
-      <label>From<select id="fFrom"></select></label>
-      <button class="swap" id="fSwap" title="Swap">⇄</button>
-      <label>To<select id="fTo"></select></label>
+      <div class="fld">From<button class="cur" id="fFrom" type="button"></button></div>
+      <button class="swap" id="fSwap" title="Swap" type="button">⇄</button>
+      <div class="fld">To<button class="cur" id="fTo" type="button"></button></div>
     </div>
+    <div class="mktline warn" id="fDup"></div>
     <label>Rate: 1 <span id="lFrom">USD</span> = how many <span id="lTo">IDR</span>?<input id="fRate" inputmode="decimal" placeholder="e.g. 16250" autocomplete="off"></label>
     <button class="link" id="fLatest">Fill with latest market rate</button>
     <div class="mktline" id="fMkt"></div>
@@ -148,7 +156,7 @@ summary{color:var(--acc);font-weight:700;padding:2px 0 10px}
 
 <div id="picker" class="sheet hidden">
   <div class="sheet-card tall">
-    <h3>Add currencies</h3>
+    <h3 id="pTitle">Add currencies</h3>
     <input id="pSearch" placeholder="Search code or name" autocomplete="off">
     <div id="pList"></div>
     <div class="actions"><button id="pClose" class="primary">Done</button></div>
@@ -180,17 +188,17 @@ const S = {
   rates: LS.get('rates', null),          // {rates:{USD:1,...}, time, fetched, source}
   active: LS.get('active', 'USD'),
   expr: LS.get('expr', '1'),
-  custom: LS.get('custom', []),          // [{id,from,to,rate,note,date}]
-  cur: LS.get('cur', null),              // id of the custom rate in use
-  cSide: LS.get('cside', 'from'),        // which custom row you're typing in: 'from' or 'to'
+  custom: LS.get('custom', []),          // [{id,from,to,rate,note,date}]: one rate per currency pair
+  corder: LS.get('corder', []),          // display order of the currencies in Custom mode
+  cActive: LS.get('cactive', null),      // highlighted currency in Custom mode
   cExpr: LS.get('cexpr', '100'),
-  editing: false, loading: false, fresh: true, editId: null
+  padHidden: LS.get('padhidden', false), // keypad slid down
+  editing: false, loading: false, fresh: true, editId: null, pickFor: null
 };
 function save() {
   LS.set('mode', S.mode); LS.set('favs', S.favs); LS.set('active', S.active); LS.set('expr', S.expr); LS.set('custom', S.custom);
-  LS.set('cur', S.cur); LS.set('cside', S.cSide); LS.set('cexpr', S.cExpr);
+  LS.set('corder', S.corder); LS.set('cactive', S.cActive); LS.set('cexpr', S.cExpr); LS.set('padhidden', S.padHidden);
 }
-function curRate() { return S.custom.find(x => x.id === S.cur) || S.custom[0] || null; }
 
 /* ---------- helpers ---------- */
 let DN = null; try { DN = new Intl.DisplayNames(['en'], { type: 'currency' }); } catch (e) {}
@@ -254,7 +262,7 @@ function pctHtml(d, words) {
   return `<span class="${p ? 'pos' : 'neg'}">${p ? '+' : ''}${d.toFixed(2)}%${words ? (p ? ' better' : ' worse') : ''}</span>`;
 }
 function rowHtml(o) {    // one currency row; used by Latest, Custom and the custom-rates list
-  return `<div class="row${o.active ? ' active' : ''}" ${o.attrs || ''}>${o.pre || ''}<span class="flag">${flagOf(o.flag)}</span><div class="cc"><b>${o.title}</b><small>${esc(o.sub)}</small></div><div class="val"><div class="big">${o.big}</div>${(o.smalls || []).filter(Boolean).map(s => '<small>' + s + '</small>').join('')}</div></div>`;
+  return `<div class="row${o.active ? ' active' : ''}${o.cls ? ' ' + o.cls : ''}" ${o.attrs || ''}>${o.pre || ''}<span class="flag">${flagOf(o.flag)}</span><div class="cc"><b>${o.title}</b><small>${esc(o.sub)}</small></div><div class="val"><div class="big">${o.big}</div>${(o.smalls || []).filter(Boolean).map(s => '<small>' + s + '</small>').join('')}</div></div>`;
 }
 function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
@@ -263,6 +271,23 @@ function allCodes() {
   const codes = r ? Object.keys(r).filter(c => /^[A-Z]{3}$/.test(c) && nameOf(c) !== c) : COMMON.slice();
   const extra = S.favs.concat(S.custom.flatMap(x => [x.from, x.to]));
   return [...new Set(codes.concat(extra))].sort();
+}
+
+/* ---------- custom rates ---------- */
+// The saved rate for a currency pair, in either direction (skipId: ignore that rate).
+function pairOf(a, b, skipId) { return S.custom.find(x => x.id !== skipId && ((x.from === a && x.to === b) || (x.from === b && x.to === a))) || null; }
+// 1 a = r b, using your own rate for that pair; null if you have no rate for it.
+function directRate(a, b) {
+  const x = pairOf(a, b);
+  return x ? { x, r: x.from === a ? x.rate : 1 / x.rate } : null;
+}
+// Keep Custom mode's currency list and highlighted currency in step with the saved rates.
+function syncCustom() {
+  const codes = [];
+  S.custom.slice().reverse().forEach(x => [x.from, x.to].forEach(c => { if (!codes.includes(c)) codes.push(c); }));
+  S.corder = S.corder.filter(c => codes.includes(c)).concat(codes.filter(c => !S.corder.includes(c)));
+  if (!S.corder.includes(S.cActive)) { S.cActive = S.corder[0] || null; S.cExpr = '100'; }
+  save();
 }
 
 /* ---------- rates ---------- */
@@ -321,54 +346,53 @@ function renderLatest() {
   $('#list').innerHTML = h;
 }
 
-// Custom mode: the chosen rate's two currencies as rows, same look as Latest.
+// Custom mode: the highlighted currency plus every currency you have a direct custom rate with.
+// While editing (reordering), all your custom currencies are shown.
 function renderCustom() {
-  const x = curRate();
-  if (!x) {
-    $('#list').innerHTML = '<div class="empty"><b>No custom rates yet.</b><br>Tap <b>+ Add</b> to save the rate you actually exchanged at (e.g. a money changer). You can enter the rate directly, or the amounts you gave and got. Convert with it any time, offline.</div>';
+  if (!S.custom.length) {
+    $('#list').innerHTML = '<div class="empty"><b>No custom rates yet.</b><br>Save the rate you actually exchanged at (e.g. a money changer). You can enter the rate directly, or the amounts you gave and got. Convert with it any time, offline.</div><button class="addrow" data-act="addrate">+ Add custom rate</button>';
     return;
   }
-  const v = evalExpr(S.cExpr);
-  const actCode = S.cSide === 'from' ? x.from : x.to;
-  $('#list').innerHTML = ['from', 'to'].map(side => {
-    const c = side === 'from' ? x.from : x.to;
+  const a = S.cActive, v = evalExpr(S.cExpr);
+  const codes = S.editing ? S.corder : S.corder.filter(c => c === a || directRate(a, c));
+  $('#list').innerHTML = codes.map(c => {
+    const i = S.corder.indexOf(c), act = c === a, d = act ? null : directRate(a, c);
     let big, smalls;
-    if (side === S.cSide) {
-      big = fmtExpr(S.cExpr);
-      smalls = [OPS.test(S.cExpr) ? '= ' + fmt(v, c) : ''];
-    } else {
-      const r = side === 'to' ? x.rate : 1 / x.rate;   // 1 active-currency = r of this one
-      big = fmt(v * r, c);
-      const d = vsMarket(x);
-      smalls = ['1 ' + actCode + ' = ' + fmtRate(r) + ' ' + c, isFinite(d) ? pctHtml(d) + ' vs market' : ''];
-    }
-    return rowHtml({ attrs: `data-side="${side}"`, active: side === S.cSide, flag: c, title: c, sub: nameOf(c), big, smalls });
-  }).join('');
-}
-
-function renderRbar() {
-  const x = S.mode === 'custom' ? curRate() : null;
-  $('#rbar').classList.toggle('hidden', !x);
-  if (!x) return;
-  const info = [x.note, fmtDate(x.date)].filter(Boolean).join(' · ');
-  $('#rbar').innerHTML = `<span class="pair">${flagOf(x.from)} ${x.from} → ${flagOf(x.to)} ${x.to}</span>${info ? '<small>· ' + esc(info) + '</small>' : ''}<span class="dd">▾</span>`;
+    if (act) { big = fmtExpr(S.cExpr); smalls = [OPS.test(S.cExpr) ? '= ' + fmt(v, c) : '']; }
+    else if (d) {
+      big = fmt(v * d.r, c);
+      const p = vsMarket(d.x);
+      smalls = ['1 ' + a + ' = ' + fmtRate(d.r) + ' ' + c, isFinite(p) ? pctHtml(p) + ' vs market' : ''];
+    } else { big = '—'; smalls = ['No rate with ' + a]; }
+    const ctl = S.editing ? `<div class="ctl"><button data-act="up" data-i="${i}" ${i ? '' : 'disabled style="opacity:.3"'}>▲</button></div>` : '';
+    return rowHtml({ attrs: `data-code="${c}"`, active: act, cls: !act && !d ? 'dim' : '', flag: c, title: c, sub: nameOf(c), big, smalls, pre: ctl });
+  }).join('') + '<button class="addrow" data-act="addrate">+ Add custom rate</button>';
 }
 
 function render() {
   const custom = S.mode === 'custom';
+  if (custom) syncCustom();
   document.body.classList.toggle('custom', custom);
   document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
-  $('#hBtn').textContent = custom ? '+ Add' : (S.editing ? 'Done' : 'Edit');
+  $('#hBtn').textContent = S.editing ? 'Done' : 'Edit';
+  $('#hBtn').classList.toggle('hidden', custom && !S.custom.length);
   $('#status').classList.toggle('hidden', custom);
-  renderStatus(); renderRbar();
-  if (custom) renderCustom(); else renderLatest();
-  $('#pad').classList.toggle('hidden', custom && !curRate());
+  $('#cstatus').classList.toggle('hidden', !custom);
+  renderStatus();
+  if (custom) {
+    const n = S.custom.length;
+    $('#cstamp').textContent = n ? n + ' custom rate' + (n === 1 ? '' : 's') : 'No custom rates yet';
+    $('#manage').classList.toggle('hidden', !n);
+    renderCustom();
+  } else renderLatest();
+  $('#pad').classList.toggle('hidden', custom && !S.custom.length);
+  $('#pad').classList.toggle('collapsed', S.padHidden);
 }
 
 /* ---------- keypad ---------- */
 function press(k) {
   const custom = S.mode === 'custom';
-  if (custom && !curRate()) return;
+  if (!k || (custom && !S.cActive)) return;
   let e = custom ? S.cExpr : S.expr;
   const digit = /^(\d|00)$/.test(k) || k === '.';
   if (S.fresh && digit) e = '0';
@@ -388,27 +412,64 @@ function press(k) {
   if (custom) S.cExpr = e; else S.expr = e;
   save(); render();
 }
-$('#pad').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) press(b.dataset.k); });
+$('#keys').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) press(b.dataset.k); });
 document.addEventListener('keydown', ev => {
   if (ev.target.matches('input,select')) return;
+  if (!$('#sheet').classList.contains('hidden') || !$('#picker').classList.contains('hidden') || !$('#rates').classList.contains('hidden')) return;
   const map = { '*': '×', '/': '÷', '-': '−', '+': '+', 'Enter': '=', '=': '=', 'Backspace': '⌫', 'Escape': 'C', '.': '.', ',': '.' };
   const k = /^\d$/.test(ev.key) ? ev.key : map[ev.key];
   if (k) { ev.preventDefault(); press(k); }
 });
 
-/* ---------- latest-mode list ---------- */
-function setActive(c) {
+// Keypad tray: tap the handle to slide it down/up, or drag it.
+const KEYS_H = 284;   // full height of the key grid (5 rows of 50px + gaps + padding)
+function setPad(hidden) { S.padHidden = hidden; save(); $('#pad').classList.toggle('collapsed', hidden); }
+function showPad() { if (S.padHidden) setPad(false); }
+let pd = null, padNoClickUntil = 0;
+const hdl = $('#padHandle'), keysEl = $('#keys');
+hdl.addEventListener('pointerdown', ev => {
+  pd = { y0: ev.clientY, h0: S.padHidden ? 0 : KEYS_H, dy: 0 };
+  try { hdl.setPointerCapture(ev.pointerId); } catch (e) {}
+});
+hdl.addEventListener('pointermove', ev => {
+  if (!pd) return;
+  pd.dy = ev.clientY - pd.y0;
+  if (Math.abs(pd.dy) > 4) { keysEl.classList.add('drag'); keysEl.style.maxHeight = Math.max(0, Math.min(KEYS_H, pd.h0 - pd.dy)) + 'px'; }
+});
+function padRelease() {
+  if (!pd) return;
+  const dy = pd.dy; pd = null;
+  keysEl.classList.remove('drag'); keysEl.style.maxHeight = '';
+  if (Math.abs(dy) > 4) {          // it was a drag, not a tap
+    padNoClickUntil = Date.now() + 400;
+    if (dy > 30) setPad(true); else if (dy < -30) setPad(false);
+  }
+}
+hdl.addEventListener('pointerup', padRelease);
+hdl.addEventListener('pointercancel', padRelease);
+hdl.addEventListener('click', () => { if (Date.now() < padNoClickUntil) return; setPad(!S.padHidden); });
+
+/* ---------- main list ---------- */
+function setActive(c) {   // Latest mode
+  showPad();
   if (c === S.active) return;
   const v = convert(evalExpr(S.expr), S.active, c);
   if (isFinite(v)) S.expr = plain(v, c);
   S.active = c; S.fresh = true; save(); render();
+}
+function setCActive(c) {  // Custom mode: carry the amount over using your rate for that pair
+  showPad();
+  if (c === S.cActive) return;
+  const d = directRate(S.cActive, c);
+  S.cExpr = d ? plain(evalExpr(S.cExpr) * d.r, c) : '100';
+  S.cActive = c; S.fresh = true; save(); render();
 }
 $('#list').addEventListener('click', ev => {
   const b = ev.target.closest('[data-act]');
   if (S.mode === 'latest') {
     if (b) {
       const i = +b.dataset.i, a = b.dataset.act;
-      if (a === 'add') return openPicker();
+      if (a === 'add') return openPicker(null);
       if (a === 'rm') {
         if (S.favs.length <= 2) return toast('Keep at least 2 currencies');
         const c = S.favs[i]; S.favs.splice(i, 1);
@@ -420,25 +481,23 @@ $('#list').addEventListener('click', ev => {
     const row = ev.target.closest('.row'); if (row) setActive(row.dataset.code);
     return;
   }
-  // custom mode: tapping the other row makes it the one you type in (value carries over)
-  const row = ev.target.closest('.row'), x = curRate();
-  if (!row || !x) return;
-  const side = row.dataset.side;
-  if (side !== S.cSide) {
-    const v = evalExpr(S.cExpr);
-    S.cExpr = side === 'to' ? plain(v * x.rate, x.to) : plain(v / x.rate, x.from);
-    S.cSide = side; S.fresh = true; save(); render();
+  // custom mode
+  if (b) {
+    const i = +b.dataset.i, a = b.dataset.act;
+    if (a === 'addrate') return openSheet(null);
+    if (a === 'up' && i > 0) { [S.corder[i - 1], S.corder[i]] = [S.corder[i], S.corder[i - 1]]; save(); render(); }
+    return;
   }
+  const row = ev.target.closest('.row'); if (row) setCActive(row.dataset.code);
 });
 
-/* ---------- "Your custom rates" list: tap to use, swipe left to edit/delete ---------- */
+/* ---------- "Your custom rates" (Manage): tap to jump to it, swipe left or long-press to edit/delete ---------- */
 const SWIPE = -144;   // width of the Edit + Delete buttons
 function renderRates() {
-  const cur = curRate();
-  const hint = S.custom.length && !LS.get('swiped', false) ? '<div class="hint">Swipe a rate left to edit or delete</div>' : '';
+  const hint = S.custom.length && !LS.get('swiped', false) ? '<div class="hint">Swipe a rate left, or long-press it, to edit or delete</div>' : '';
   $('#rList').innerHTML = S.custom.map(x => `<div class="sw" data-id="${x.id}"><div class="acts"><button class="e" data-act="edit">Edit</button><button class="d" data-act="del">Delete</button></div>${
-    rowHtml({ active: cur && cur.id === x.id, flag: x.from, title: x.from + ' → ' + x.to, sub: [x.note, fmtDate(x.date)].filter(Boolean).join(' · '), big: fmtRate(x.rate), smalls: [pctHtml(vsMarket(x))] })
-  }</div>`).join('') + hint + '<button class="addrow" data-act="add">+ Add custom rate</button>';
+    rowHtml({ flag: x.from, title: x.from + ' → ' + x.to, sub: [x.note, fmtDate(x.date)].filter(Boolean).join(' · '), big: fmtRate(x.rate), smalls: [pctHtml(vsMarket(x))] })
+  }</div>`).join('') + hint + '<button class="addrow" data-act="addrate">+ Add custom rate</button>';
 }
 function openRates() { renderRates(); $('#rates').classList.remove('hidden'); }
 function closeRates() { $('#rates').classList.add('hidden'); }
@@ -449,86 +508,133 @@ function setSwipe(el, off, dragging) {
 }
 function closeSwipes(except) { document.querySelectorAll('#rList .sw.open').forEach(e => { if (e !== except) setSwipe(e, 0); }); }
 let sw = null, noClickUntil = 0;
-$('#rList').addEventListener('pointerdown', ev => {
-  const el = ev.target.closest('.sw');
-  if (!el || ev.target.closest('.acts')) return;
-  sw = { el, id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, base: el.classList.contains('open') ? SWIPE : 0, off: 0, dir: 0 };
-});
-$('#rList').addEventListener('pointermove', ev => {
-  if (!sw || ev.pointerId !== sw.id) return;
-  const dx = ev.clientX - sw.x0, dy = ev.clientY - sw.y0;
-  if (!sw.dir) {   // decide: sideways swipe, or a normal vertical scroll?
-    if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { sw.dir = 1; closeSwipes(sw.el); try { sw.el.setPointerCapture(ev.pointerId); } catch (e) {} }
-    else if (Math.abs(dy) > 8) { sw = null; return; }
+function swStart(el, x, y) {
+  sw = { el, x0: x, y0: y, base: el.classList.contains('open') ? SWIPE : 0, off: 0, dir: 0, long: false };
+  sw.timer = setTimeout(() => {       // long-press also opens Edit/Delete
+    if (!sw || sw.dir) return;
+    closeSwipes(sw.el); setSwipe(sw.el, SWIPE); sw.long = true; LS.set('swiped', true);
+    if (navigator.vibrate) navigator.vibrate(12);
+  }, 450);
+}
+function swMove(x, y) {                // returns true while this is a sideways swipe (page mustn't scroll)
+  if (!sw) return false;
+  if (sw.long) return true;
+  const dx = x - sw.x0, dy = y - sw.y0;
+  if (!sw.dir) {
+    if (Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy)) { sw.dir = 1; clearTimeout(sw.timer); closeSwipes(sw.el); }
+    else if (Math.abs(dy) > 6) { clearTimeout(sw.timer); sw = null; return false; }
+    else return false;
   }
-  if (sw.dir) { sw.off = Math.max(SWIPE - 24, Math.min(0, sw.base + dx)); setSwipe(sw.el, sw.off, true); }
-});
-function endSwipe() {
-  if (sw && sw.dir) {
-    const open = sw.off < SWIPE / 2;
-    setSwipe(sw.el, open ? SWIPE : 0);
-    if (open) LS.set('swiped', true);
-    noClickUntil = Date.now() + 350;   // the finger lifting shouldn't also count as a tap
-  }
+  sw.off = Math.max(SWIPE - 24, Math.min(0, sw.base + dx));
+  setSwipe(sw.el, sw.off, true);
+  return true;
+}
+function swEnd() {
+  if (!sw) return;
+  clearTimeout(sw.timer);
+  if (sw.dir) { const open = sw.off < SWIPE / 2; setSwipe(sw.el, open ? SWIPE : 0); if (open) LS.set('swiped', true); }
+  if (sw.dir || sw.long) noClickUntil = Date.now() + 400;   // lifting the finger isn't a tap
   sw = null;
 }
-$('#rList').addEventListener('pointerup', endSwipe);
-$('#rList').addEventListener('pointercancel', endSwipe);
-$('#rList').addEventListener('click', ev => {
-  if (Date.now() < noClickUntil) return;
+const rl = $('#rList');
+// Touch (phones): handled directly so Android/iPhone don't treat the swipe as a scroll.
+rl.addEventListener('touchstart', ev => {
+  const el = ev.target.closest('.sw');
+  if (el && !ev.target.closest('.acts') && ev.touches.length === 1) swStart(el, ev.touches[0].clientX, ev.touches[0].clientY);
+}, { passive: true });
+rl.addEventListener('touchmove', ev => {
+  if (sw && swMove(ev.touches[0].clientX, ev.touches[0].clientY) && ev.cancelable) ev.preventDefault();
+}, { passive: false });
+rl.addEventListener('touchend', swEnd);
+rl.addEventListener('touchcancel', swEnd);
+// Mouse (PC): click-and-drag works the same way.
+let touchedAt = 0;
+rl.addEventListener('touchstart', () => { touchedAt = Date.now(); }, { passive: true });
+rl.addEventListener('mousedown', ev => {
+  if (Date.now() - touchedAt < 800) return;   // ignore the fake mouse events phones send after a touch
+  const el = ev.target.closest('.sw');
+  if (el && !ev.target.closest('.acts')) swStart(el, ev.clientX, ev.clientY);
+});
+window.addEventListener('mousemove', ev => { if (sw) swMove(ev.clientX, ev.clientY); });
+window.addEventListener('mouseup', () => { if (Date.now() - touchedAt >= 800) swEnd(); });
+rl.addEventListener('contextmenu', ev => ev.preventDefault());
+rl.addEventListener('click', ev => {
+  if (Date.now() < noClickUntil && !ev.target.closest('.acts')) return;   // Edit/Delete taps always count
   const b = ev.target.closest('[data-act]');
-  if (b && b.dataset.act === 'add') { closeRates(); return openSheet(null); }
+  if (b && b.dataset.act === 'addrate') { closeRates(); return openSheet(null); }
   const el = ev.target.closest('.sw'); if (!el) return;
   const x = S.custom.find(y => y.id === el.dataset.id); if (!x) return;
   if (b && b.dataset.act === 'edit') { closeRates(); return openSheet(x); }
   if (b && b.dataset.act === 'del') {
     if (!confirm(`Delete the ${x.from} → ${x.to} rate?`)) return;
     S.custom = S.custom.filter(y => y.id !== x.id);
-    if (S.cur === x.id) { S.cur = S.custom.length ? S.custom[0].id : null; S.cSide = 'from'; S.cExpr = '100'; S.fresh = true; }
     save(); render();
     if (S.custom.length) renderRates(); else closeRates();
     return;
   }
   if (el.classList.contains('open')) return setSwipe(el, 0);   // tap on a swiped row just closes it
-  const cur = curRate();
-  if (!cur || cur.id !== x.id) { S.cur = x.id; S.cSide = 'from'; S.cExpr = '100'; S.fresh = true; save(); }
-  closeRates(); render();
+  closeRates();
+  if (S.cActive !== x.from && S.cActive !== x.to) setCActive(x.from); else render();
 });
 $('#rClose').addEventListener('click', closeRates);
-$('#rbar').addEventListener('click', openRates);
+$('#manage').addEventListener('click', openRates);
 
-/* ---------- picker ---------- */
+/* ---------- currency picker (Latest favourites, or From/To in the custom-rate form) ---------- */
 function renderPicker() {
   const q = $('#pSearch').value.trim().toLowerCase();
+  const ticked = c => S.pickFor ? c === F[S.pickFor] : S.favs.includes(c);
   $('#pList').innerHTML = allCodes().filter(c => !q || c.toLowerCase().includes(q) || nameOf(c).toLowerCase().includes(q)).map(c =>
-    `<div class="pi" data-code="${c}"><span class="flag">${flagOf(c)}</span><div><b>${c}</b><small>${esc(nameOf(c))}</small></div>${S.favs.includes(c) ? '<span class="tick">✓</span>' : ''}</div>`).join('');
+    `<div class="pi" data-code="${c}"><span class="flag">${flagOf(c)}</span><div><b>${c}</b><small>${esc(nameOf(c))}</small></div>${ticked(c) ? '<span class="tick">✓</span>' : ''}</div>`).join('');
 }
-function openPicker() { $('#pSearch').value = ''; renderPicker(); $('#picker').classList.remove('hidden'); }
+function openPicker(forField) {
+  S.pickFor = forField;
+  $('#pTitle').textContent = forField === 'from' ? 'From currency' : forField === 'to' ? 'To currency' : 'Add currencies';
+  $('#pClose').textContent = forField ? 'Cancel' : 'Done';
+  $('#pSearch').value = ''; renderPicker(); $('#picker').classList.remove('hidden');
+}
+function closePicker() { $('#picker').classList.add('hidden'); S.pickFor = null; }
 $('#pSearch').addEventListener('input', renderPicker);
 $('#pList').addEventListener('click', ev => {
   const it = ev.target.closest('.pi'); if (!it) return;
-  const c = it.dataset.code, i = S.favs.indexOf(c);
+  const c = it.dataset.code;
+  if (S.pickFor) { F[S.pickFor] = c; closePicker(); return syncForm(); }
+  const i = S.favs.indexOf(c);
   if (i >= 0) { if (S.favs.length > 2 && c !== S.active) S.favs.splice(i, 1); }
   else S.favs.push(c);
   save(); renderPicker(); render();
 });
-$('#pClose').addEventListener('click', () => $('#picker').classList.add('hidden'));
+$('#pClose').addEventListener('click', closePicker);
 
-/* ---------- custom-rate sheet ---------- */
-function fillSelects(from, to) {
-  const opts = allCodes().map(c => `<option value="${c}">${c} · ${esc(nameOf(c))}</option>`).join('');
-  $('#fFrom').innerHTML = opts; $('#fTo').innerHTML = opts;
-  $('#fFrom').value = from; $('#fTo').value = to;
-  syncLabels();
-}
-function syncLabels() {
-  $('#lFrom').textContent = $('#lGave').textContent = $('#fFrom').value;
-  $('#lTo').textContent = $('#lGot').textContent = $('#fTo').value;
+/* ---------- custom-rate form ---------- */
+const F = { from: 'USD', to: 'IDR' };
+const num = s => parseFloat(String(s).replace(/,/g, ''));
+function curBtn(c) { return `${flagOf(c)} <b>${c}</b> <small>${esc(nameOf(c))}</small>`; }
+function syncForm() {
+  $('#fFrom').innerHTML = curBtn(F.from); $('#fTo').innerHTML = curBtn(F.to);
+  $('#lFrom').textContent = $('#lGave').textContent = F.from;
+  $('#lTo').textContent = $('#lGot').textContent = F.to;
+  const dup = F.from !== F.to ? pairOf(F.from, F.to, S.editId) : null;
+  $('#fDup').textContent = dup ? `You already have a ${dup.from} → ${dup.to} rate (${fmtRate(dup.rate)}). Saving will replace it.` : '';
   updMkt();
 }
-// Live "vs market" line in the add/edit form.
+function openSheet(x) {
+  S.editId = x ? x.id : null;
+  $('#sTitle').textContent = x ? 'Edit custom rate' : 'Add custom rate';
+  if (x) { F.from = x.from; F.to = x.to; }
+  else {
+    F.to = S.cActive || 'IDR';
+    F.from = S.favs.find(c => c !== F.to && !pairOf(c, F.to)) || (F.to === 'USD' ? 'EUR' : 'USD');
+  }
+  $('#fRate').value = x ? String(x.rate) : '';
+  $('#fNote').value = x ? x.note || '' : '';
+  $('#fDate').value = x ? x.date || today() : today();
+  $('#fGave').value = $('#fGot').value = ''; $('#fCalc').open = false;
+  syncForm();
+  $('#sheet').classList.remove('hidden');
+}
+// Live "vs market" line in the form.
 function updMkt() {
-  const from = $('#fFrom').value, to = $('#fTo').value, r = num($('#fRate').value);
+  const from = F.from, to = F.to, r = num($('#fRate').value);
   const mk = convert(1, from, to);
   if (from === to || !isFinite(mk)) { $('#fMkt').innerHTML = ''; return; }
   let h = `Market: 1 ${from} = ${fmtRate(mk)} ${to}`;
@@ -542,26 +648,15 @@ function updMkt() {
   }
   $('#fMkt').innerHTML = h;
 }
-function openSheet(x) {
-  S.editId = x ? x.id : null;
-  $('#sTitle').textContent = x ? 'Edit custom rate' : 'Add custom rate';
-  fillSelects(x ? x.from : (S.favs.find(c => c !== 'IDR') || 'USD'), x ? x.to : 'IDR');
-  $('#fRate').value = x ? String(x.rate) : '';
-  $('#fNote').value = x ? x.note || '' : '';
-  $('#fDate').value = x ? x.date || today() : today();
-  $('#fGave').value = $('#fGot').value = ''; $('#fCalc').open = false;
-  $('#sheet').classList.remove('hidden');
-}
-const num = s => parseFloat(String(s).replace(/,/g, ''));
-$('#fFrom').addEventListener('change', syncLabels);
-$('#fTo').addEventListener('change', syncLabels);
+$('#fFrom').addEventListener('click', () => openPicker('from'));
+$('#fTo').addEventListener('click', () => openPicker('to'));
 $('#fSwap').addEventListener('click', () => {
-  const a = $('#fFrom').value; $('#fFrom').value = $('#fTo').value; $('#fTo').value = a;
+  [F.from, F.to] = [F.to, F.from];
   const r = num($('#fRate').value); if (r > 0) $('#fRate').value = String(+(1 / r).toPrecision(8));
-  syncLabels();
+  syncForm();
 });
 $('#fLatest').addEventListener('click', () => {
-  const v = convert(1, $('#fFrom').value, $('#fTo').value);
+  const v = convert(1, F.from, F.to);
   if (isFinite(v)) $('#fRate').value = String(+v.toPrecision(8)); else toast('No market rate saved yet');
   updMkt();
 });
@@ -575,26 +670,31 @@ $('#fGave').addEventListener('input', calcFromAmounts);
 $('#fGot').addEventListener('input', calcFromAmounts);
 $('#fCancel').addEventListener('click', () => $('#sheet').classList.add('hidden'));
 $('#fSave').addEventListener('click', () => {
-  const from = $('#fFrom').value, to = $('#fTo').value, rate = num($('#fRate').value);
+  const from = F.from, to = F.to, rate = num($('#fRate').value);
   if (from === to) return toast('Pick two different currencies');
   if (!(rate > 0)) return toast('Enter a rate above 0');
-  const item = { id: S.editId || String(Date.now()), from, to, rate, note: $('#fNote').value.trim(), date: $('#fDate').value };
   const old = S.custom.find(y => y.id === S.editId);
-  if (old) S.custom = S.custom.map(y => y.id === S.editId ? item : y);
-  else S.custom.unshift(item);
-  // Show the new/edited rate. Start from the amount you gave (or 100), unless only the rate/note changed.
-  if (!old || old.from !== from || old.to !== to || S.cur !== item.id) {
+  const dup = pairOf(from, to, S.editId);           // same pair already saved: replace it
+  const id = S.editId || (dup && dup.id) || String(Date.now());
+  const item = { id, from, to, rate, note: $('#fNote').value.trim(), date: $('#fDate').value };
+  let list = S.custom.filter(y => !(dup && y.id === dup.id && y.id !== id));
+  if (list.some(y => y.id === id)) list = list.map(y => y.id === id ? item : y); else list.unshift(item);
+  S.custom = list;
+  // New rate (or currencies changed): show it, starting from the amount you gave (or 100).
+  if (!old || old.from !== from || old.to !== to) {
     const g = num($('#fGave').value);
-    S.cSide = 'from'; S.cExpr = g > 0 ? plain(g, from) : '100';
+    S.cActive = from; S.cExpr = g > 0 ? plain(g, from) : '100'; S.fresh = true;
   }
-  S.cur = item.id; S.fresh = true;
   save(); $('#sheet').classList.add('hidden'); render();
 });
-document.querySelectorAll('.sheet').forEach(s => s.addEventListener('click', ev => { if (ev.target === s) s.classList.add('hidden'); }));
+document.querySelectorAll('.sheet').forEach(s => s.addEventListener('click', ev => {
+  if (ev.target !== s) return;
+  if (s.id === 'picker') closePicker(); else s.classList.add('hidden');
+}));
 
 /* ---------- header ---------- */
 document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.mode; S.editing = false; S.fresh = true; save(); render(); }));
-$('#hBtn').addEventListener('click', () => { if (S.mode === 'latest') { S.editing = !S.editing; render(); } else openSheet(null); });
+$('#hBtn').addEventListener('click', () => { S.editing = !S.editing; render(); });
 $('#refresh').addEventListener('click', () => fetchRates(true));
 window.addEventListener('online', () => { renderStatus(); fetchRates(false); });
 window.addEventListener('offline', renderStatus);
@@ -605,7 +705,18 @@ if (!S.favs.includes(S.active)) S.active = S.favs[0];
 render();
 maybeRefresh();
 setInterval(renderStatus, 60000);
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+// Offline support + updates: when a new version has been downloaded, reload once to show it.
+if ('serviceWorker' in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && !reloading) { reloading = true; location.reload(); }
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+  }).catch(() => {});
+}
 </script>
 </body>
 </html>

@@ -1,10 +1,12 @@
 // SteveFx service worker: serves the app from cache so it opens offline.
 // Bump VERSION when you change files, so phones pick up the update.
-const VERSION = 'stevefx-v2';
+const VERSION = 'stevefx-v3';
 const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
 
+// Install: download every file fresh from the server (cache: 'reload' skips the
+// browser's own short-term cache, so an update never re-saves the old version).
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS)));
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' })))));
   self.skipWaiting();
 });
 
@@ -20,7 +22,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
   e.respondWith(caches.open(VERSION).then(async cache => {
     const cached = await cache.match(e.request, { ignoreSearch: true });
-    const network = fetch(e.request).then(res => {
+    const network = fetch(e.request.url, { cache: 'no-cache' }).then(res => {
       if (res.ok) cache.put(e.request, res.clone());
       return res;
     }).catch(() => cached);
