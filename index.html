@@ -106,6 +106,18 @@ summary{color:var(--acc);font-weight:700;padding:2px 0 10px}
 .pi .flag{font-size:22px}
 .pi small{color:var(--muted);display:block;font-size:12.5px}
 .pi .tick{margin-left:auto;color:var(--acc);font-weight:800}
+/* Edit (reorder) mode: keypad slides away, amounts and other controls fade; only ▲/✕ and Done stay live */
+.seg,.statusline,.row,.val,.cc,.addrow{transition:opacity .2s ease,background-color .2s ease,border-color .2s ease}
+#pad{transition:padding .25s ease,opacity .25s ease}
+body.editing .seg,body.editing .statusline{opacity:.35;pointer-events:none}
+body.editing #pad{opacity:.35;pointer-events:none;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+body.editing #keys{max-height:0;padding-bottom:0}
+body.editing #list .row .val{opacity:.3}
+body.editing #list .row.active{border-color:transparent;background:var(--card)}
+body.editing #list .row.active .big{color:inherit}
+body.editing #list .row.dim{opacity:1}
+body.editing #list .row.dim .cc,body.editing #list .row.dim .flag{opacity:.45}
+body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
 #toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20;max-width:90vw;text-align:center}
 #toast.show{opacity:1}
 </style>
@@ -373,6 +385,7 @@ function render() {
   const custom = S.mode === 'custom';
   if (custom) syncCustom();
   document.body.classList.toggle('custom', custom);
+  document.body.classList.toggle('editing', S.editing);
   document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
   $('#hBtn').textContent = S.editing ? 'Done' : 'Edit';
   $('#hBtn').classList.toggle('hidden', custom && !S.custom.length);
@@ -392,7 +405,7 @@ function render() {
 /* ---------- keypad ---------- */
 function press(k) {
   const custom = S.mode === 'custom';
-  if (!k || (custom && !S.cActive)) return;
+  if (!k || S.editing || (custom && !S.cActive)) return;
   let e = custom ? S.cExpr : S.expr;
   const digit = /^(\d|00)$/.test(k) || k === '.';
   if (S.fresh && digit) e = '0';
@@ -414,7 +427,7 @@ function press(k) {
 }
 $('#keys').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) press(b.dataset.k); });
 document.addEventListener('keydown', ev => {
-  if (ev.target.matches('input,select')) return;
+  if (ev.target.matches('input,select') || S.editing) return;
   if (!$('#sheet').classList.contains('hidden') || !$('#picker').classList.contains('hidden') || !$('#rates').classList.contains('hidden')) return;
   const map = { '*': '×', '/': '÷', '-': '−', '+': '+', 'Enter': '=', '=': '=', 'Backspace': '⌫', 'Escape': 'C', '.': '.', ',': '.' };
   const k = /^\d$/.test(ev.key) ? ev.key : map[ev.key];
@@ -478,17 +491,17 @@ $('#list').addEventListener('click', ev => {
       if (a === 'up' && i > 0) [S.favs[i - 1], S.favs[i]] = [S.favs[i], S.favs[i - 1]];
       save(); return render();
     }
-    const row = ev.target.closest('.row'); if (row) setActive(row.dataset.code);
+    const row = ev.target.closest('.row'); if (row && !S.editing) setActive(row.dataset.code);
     return;
   }
   // custom mode
   if (b) {
     const i = +b.dataset.i, a = b.dataset.act;
-    if (a === 'addrate') return openSheet(null);
+    if (a === 'addrate') return S.editing ? undefined : openSheet(null);
     if (a === 'up' && i > 0) { [S.corder[i - 1], S.corder[i]] = [S.corder[i], S.corder[i - 1]]; save(); render(); }
     return;
   }
-  const row = ev.target.closest('.row'); if (row) setCActive(row.dataset.code);
+  const row = ev.target.closest('.row'); if (row && !S.editing) setCActive(row.dataset.code);
 });
 
 /* ---------- "Your custom rates" (Manage): tap to jump to it, swipe left or long-press to edit/delete ---------- */
