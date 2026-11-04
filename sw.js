@@ -1,0 +1,29 @@
+// EZ FX service worker: serves the app from cache so it opens offline.
+// Bump VERSION when you change files, so phones pick up the update.
+const VERSION = 'ezfx-v1';
+const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS)));
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k)))));
+  self.clients.claim();
+});
+
+// App files: answer from cache instantly, refresh the cache in the background.
+// Rate API calls (other domains) go straight to the network; the app saves rates itself.
+self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+  e.respondWith(caches.open(VERSION).then(async cache => {
+    const cached = await cache.match(e.request, { ignoreSearch: true });
+    const network = fetch(e.request).then(res => {
+      if (res.ok) cache.put(e.request, res.clone());
+      return res;
+    }).catch(() => cached);
+    return cached || network;
+  }));
+});

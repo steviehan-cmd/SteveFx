@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0b1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EZ FX">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<title>EZ FX</title>
+<style>
+:root{--bg:#f3f5f7;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e3e7ec;--acc:#0b8f63;--acc-soft:#e2f5ed;--key:#fff;--key2:#e6ebf0;--up:#059669;--down:#dc2626;--shadow:0 1px 2px rgba(0,0,0,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1117;--card:#141c25;--text:#e8edf2;--muted:#8794a1;--line:#222c37;--acc:#34d399;--acc-soft:#10291f;--key:#18212b;--key2:#222e3b;--up:#34d399;--down:#f87171;--shadow:none}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+body{display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top)}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select{font:inherit;-webkit-user-select:text;user-select:text}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px 6px}
+header h1{font-size:19px;margin:0;font-weight:800;letter-spacing:-.3px}
+header h1 span{color:var(--acc)}
+.seg{display:flex;background:var(--key2);border-radius:10px;padding:3px;margin-left:auto}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-size:14px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+#hBtn{border:0;background:var(--acc-soft);color:var(--acc);font-weight:700;font-size:14px;padding:7px 12px;border-radius:9px}
+#status{display:flex;align-items:center;gap:8px;padding:2px 14px 8px;font-size:12.5px;color:var(--muted)}
+#status .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
+#status .dot.on{background:var(--up)}
+#status button{margin-left:auto;border:0;background:transparent;color:var(--acc);font-weight:700;font-size:13px;padding:4px 2px}
+#status button.spin{opacity:.5}
+main{flex:1;overflow-y:auto;padding:0 12px 12px;-webkit-overflow-scrolling:touch}
+.row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid transparent;border-radius:14px;padding:11px 12px;margin-bottom:7px;box-shadow:var(--shadow)}
+.row.active{border-color:var(--acc);background:var(--acc-soft)}
+.flag{font-size:26px;line-height:1;width:32px;text-align:center;flex:none}
+.cc{min-width:0;flex:none;max-width:42%}
+.cc b{display:block;font-size:16px}
+.cc small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.val{flex:1;text-align:right;min-width:0}
+.val .big{font-size:21px;font-weight:650;font-variant-numeric:tabular-nums;word-break:break-all}
+.val small{display:block;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.row.active .big{color:var(--acc)}
+.ctl{display:flex;gap:4px;flex:none}
+.ctl button{border:0;background:var(--key2);width:32px;height:32px;border-radius:8px;font-size:15px}
+.ctl .rm{color:var(--down)}
+.addrow{display:block;width:100%;border:1.5px dashed var(--line);background:transparent;color:var(--acc);font-weight:700;border-radius:14px;padding:12px;margin-top:2px}
+.empty{background:var(--card);border-radius:14px;padding:16px;color:var(--muted);font-size:14px;margin-bottom:8px;line-height:1.45}
+.empty b{color:var(--text)}
+/* custom cards */
+.card{background:var(--card);border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);border:1.5px solid transparent}
+.card.open{border-color:var(--acc)}
+.card .pair{display:flex;align-items:center;gap:6px;font-weight:700;font-size:15px}
+.card .pair .when{margin-left:auto;font-weight:500;color:var(--muted);font-size:12.5px}
+.card .rate{font-size:22px;font-weight:700;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.card .inv,.card .note{color:var(--muted);font-size:12.5px}
+.card .mkt{font-size:12.5px;margin-top:6px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pos{color:var(--up);font-weight:700}.neg{color:var(--down);font-weight:700}
+.conv{margin-top:10px;display:grid;gap:6px}
+.conv .f{display:flex;align-items:center;gap:8px;border-radius:11px;padding:9px 11px;background:var(--bg);border:1.5px solid transparent}
+.conv .f.on{border-color:var(--acc);background:var(--acc-soft)}
+.conv .f b{flex:none}
+.conv .f .big{flex:1;text-align:right;font-size:20px;font-weight:650;font-variant-numeric:tabular-nums;word-break:break-all}
+.conv .f.on .big{color:var(--acc)}
+.cact{display:flex;gap:8px;margin-top:8px}
+.cact button{flex:1;border:0;border-radius:9px;padding:8px;background:var(--key2);font-size:14px;font-weight:600}
+.cact .del{color:var(--down)}
+/* keypad */
+#pad{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:50px;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg)}
+#pad.hidden{display:none}
+#pad button{border:0;border-radius:12px;background:var(--key);font-size:22px;box-shadow:var(--shadow);touch-action:manipulation}
+#pad button:active{filter:brightness(.9)}
+#pad .op{background:var(--key2);color:var(--acc);font-weight:600}
+#pad .eq{grid-row:span 2;background:var(--acc);color:#fff;font-weight:700}
+@media (prefers-color-scheme:dark){#pad .eq{color:#062016}}
+/* sheets */
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet.hidden{display:none}
+.sheet-card{background:var(--card);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:92dvh;overflow-y:auto}
+.sheet-card.tall{height:85dvh;display:flex;flex-direction:column}
+.sheet-card h3{margin:0 0 12px;font-size:18px}
+.sheet label{display:block;font-size:13px;color:var(--muted);margin-bottom:10px}
+.sheet input,.sheet select{display:block;width:100%;margin-top:4px;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:17px}
+.two{display:flex;gap:8px;align-items:flex-end}
+.two label{flex:1}
+.swap{border:0;background:var(--key2);border-radius:10px;width:44px;height:46px;margin-bottom:10px;font-size:18px;flex:none}
+.link{border:0;background:transparent;color:var(--acc);font-weight:700;font-size:14px;padding:0 0 12px}
+details{margin-bottom:10px;font-size:14px}
+summary{color:var(--acc);font-weight:700;padding:2px 0 10px}
+.actions{display:flex;gap:10px;margin-top:6px}
+.actions button{flex:1;border:0;border-radius:11px;padding:13px;font-weight:700;background:var(--key2)}
+.actions .primary{background:var(--acc);color:#fff}
+@media (prefers-color-scheme:dark){.actions .primary{color:#062016}}
+#pSearch{margin:0 0 10px}
+#pList{flex:1;overflow-y:auto}
+.pi{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.pi .flag{font-size:22px}
+.pi small{color:var(--muted);display:block;font-size:12.5px}
+.pi .tick{margin-left:auto;color:var(--acc);font-weight:800}
+#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>EZ <span>FX</span></h1>
+  <div class="seg"><button data-mode="latest">Latest</button><button data-mode="custom">Custom</button></div>
+  <button id="hBtn">Edit</button>
+</header>
+<div id="status"><span class="dot" id="dot"></span><span id="stamp">No rates yet</span><button id="refresh">↻ Refresh</button></div>
+<main id="list"></main>
+<div id="pad">
+  <button class="op" data-k="C">C</button><button class="op" data-k="⌫">⌫</button><button class="op" data-k="÷">÷</button><button class="op" data-k="×">×</button>
+  <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="−">−</button>
+  <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="+">+</button>
+  <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="eq" data-k="=">=</button>
+  <button data-k="00">00</button><button data-k="0">0</button><button data-k=".">.</button>
+</div>
+
+<div id="sheet" class="sheet hidden">
+  <div class="sheet-card">
+    <h3 id="sTitle">Add custom rate</h3>
+    <div class="two">
+      <label>From<select id="fFrom"></select></label>
+      <button class="swap" id="fSwap" title="Swap">⇄</button>
+      <label>To<select id="fTo"></select></label>
+    </div>
+    <label>Rate: 1 <span id="lFrom">USD</span> = how many <span id="lTo">IDR</span>?<input id="fRate" inputmode="decimal" placeholder="e.g. 16250" autocomplete="off"></label>
+    <button class="link" id="fLatest">Fill with latest market rate</button>
+    <details id="fCalc"><summary>Or work it out from the amounts</summary>
+      <div class="two">
+        <label>I gave (<span id="lGave">USD</span>)<input id="fGave" inputmode="decimal" placeholder="500"></label>
+        <label>I got (<span id="lGot">IDR</span>)<input id="fGot" inputmode="decimal" placeholder="8,125,000"></label>
+      </div>
+    </details>
+    <label>Note (optional)<input id="fNote" placeholder="e.g. Money changer, Kuta" autocomplete="off"></label>
+    <label>Date<input id="fDate" type="date"></label>
+    <div class="actions"><button id="fCancel">Cancel</button><button id="fSave" class="primary">Save</button></div>
+  </div>
+</div>
+
+<div id="picker" class="sheet hidden">
+  <div class="sheet-card tall">
+    <h3>Add currencies</h3>
+    <input id="pSearch" placeholder="Search code or name" autocomplete="off">
+    <div id="pList"></div>
+    <div class="actions"><button id="pClose" class="primary">Done</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('ezfx.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('ezfx.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const ZERO = new Set(['IDR','JPY','KRW','VND','CLP','HUF','ISK','PYG','UGX','LAK','MMK','KHR','IRR','COP','KZT','UZS']);
+const COMMON = ['USD','EUR','GBP','JPY','CNY','SGD','MYR','THB','IDR','AUD','NZD','HKD','KRW','INR','PHP','VND','TWD','CHF','CAD','AED','SAR','TRY','ZAR'];
+const OPS = /[+−×÷]/;
+
+const S = {
+  mode: LS.get('mode', 'latest'),
+  favs: LS.get('favs', ['IDR','USD','SGD','EUR','JPY','AUD']),
+  rates: LS.get('rates', null),          // {rates:{USD:1,...}, time, fetched, source}
+  active: LS.get('active', 'USD'),
+  expr: LS.get('expr', '1'),
+  custom: LS.get('custom', []),          // [{id,from,to,rate,note,date}]
+  openId: null, cSide: 'from', cExpr: '100',
+  editing: false, loading: false, fresh: true, editId: null
+};
+function save() { LS.set('mode', S.mode); LS.set('favs', S.favs); LS.set('active', S.active); LS.set('expr', S.expr); LS.set('custom', S.custom); }
+
+/* ---------- helpers ---------- */
+let DN = null; try { DN = new Intl.DisplayNames(['en'], { type: 'currency' }); } catch (e) {}
+function nameOf(c) { try { return DN ? DN.of(c) : c; } catch (e) { return c; } }
+function flagOf(c) {
+  if (c === 'EUR') return '🇪🇺';
+  if (c[0] === 'X') return '🪙';
+  return String.fromCodePoint(...[...c.slice(0, 2)].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
+}
+function esc(s) { return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+function decimals(v, c) {
+  const a = Math.abs(v);
+  if (a > 0 && a < 0.01) return 6;
+  if (a > 0 && a < 1) return 4;
+  return ZERO.has(c) ? 0 : 2;
+}
+function fmt(v, c) {
+  if (!isFinite(v)) return '—';
+  const d = decimals(v, c);
+  return v.toLocaleString('en-US', { minimumFractionDigits: Math.min(d, 2), maximumFractionDigits: d });
+}
+function fmtRate(v) {
+  if (!isFinite(v)) return '—';
+  return v.toLocaleString('en-US', { maximumFractionDigits: v >= 100 ? 2 : v >= 1 ? 4 : 8 });
+}
+function evalExpr(s) {
+  let t = String(s).replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/,/g, '');
+  if (!/^[0-9.+\-*/ ]*$/.test(t)) return NaN;
+  t = t.replace(/[+\-*/.]+$/, '');
+  if (!t) return 0;
+  try { const v = Function('"use strict";return (' + t + ')')(); return isFinite(v) ? v : NaN; } catch (e) { return NaN; }
+}
+function fmtExpr(e) {
+  return String(e).replace(/\d+(\.\d*)?/g, m => {
+    const [i, d] = m.split('.');
+    return Number(i).toLocaleString('en-US') + (d !== undefined ? '.' + d : '');
+  }).replace(/([+−×÷])/g, ' $1 ');
+}
+function plain(v, c) { return isFinite(v) ? String(+v.toFixed(decimals(v, c))) : '0'; }
+function convert(v, from, to) {
+  const r = S.rates && S.rates.rates;
+  if (!r || !r[from] || !r[to]) return NaN;
+  return v / r[from] * r[to];
+}
+function ago(t) {
+  const m = Math.round((Date.now() - t) / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + ' min ago';
+  const h = Math.round(m / 60);
+  if (h < 48) return h + ' h ago';
+  return Math.round(h / 24) + ' days ago';
+}
+function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
+function allCodes() {
+  const r = S.rates && S.rates.rates;
+  const codes = r ? Object.keys(r).filter(c => /^[A-Z]{3}$/.test(c) && nameOf(c) !== c) : COMMON.slice();
+  const extra = S.favs.concat(S.custom.flatMap(x => [x.from, x.to]));
+  return [...new Set(codes.concat(extra))].sort();
+}
+
+/* ---------- rates ---------- */
+async function fetchRates(manual) {
+  if (S.loading) return;
+  if (!navigator.onLine) { if (manual) toast('You\'re offline — using saved rates'); return; }
+  S.loading = true; renderStatus();
+  let data = null;
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
+    const j = await r.json();
+    if (j.result === 'success') data = { rates: j.rates, time: j.time_last_update_unix * 1000, fetched: Date.now(), source: 'open.er-api.com' };
+  } catch (e) {}
+  if (!data) {
+    try {
+      const r = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json', { cache: 'no-store' });
+      const j = await r.json(); const rates = {};
+      for (const [k, v] of Object.entries(j.usd)) if (/^[a-z]{3}$/.test(k) && v > 0) rates[k.toUpperCase()] = v;
+      data = { rates, time: Date.parse(j.date), fetched: Date.now(), source: 'currency-api' };
+    } catch (e) {}
+  }
+  S.loading = false;
+  if (data) { S.rates = data; LS.set('rates', data); if (manual) toast('Rates updated'); }
+  else if (manual) toast('Couldn\'t reach the rate servers');
+  render();
+}
+
+/* ---------- render ---------- */
+function renderStatus() {
+  $('#dot').classList.toggle('on', navigator.onLine);
+  const b = $('#refresh'); b.classList.toggle('spin', S.loading); b.textContent = S.loading ? 'Updating…' : '↻ Refresh';
+  if (!S.rates) { $('#stamp').textContent = navigator.onLine ? 'No rates yet' : 'Offline · no rates saved yet'; return; }
+  const t = new Date(S.rates.time).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  $('#stamp').textContent = 'Rates ' + t + ' · checked ' + ago(S.rates.fetched) + (navigator.onLine ? '' : ' · offline');
+}
+
+function renderLatest() {
+  const amt = evalExpr(S.expr);
+  let h = '';
+  if (!S.rates) h += '<div class="empty"><b>No market rates saved yet.</b><br>Connect to the internet once and tap Refresh. After that, conversions work offline using the last saved rates. Custom mode works without any download.</div>';
+  h += S.favs.map((c, i) => {
+    const act = c === S.active;
+    let big, sub;
+    if (act) {
+      big = fmtExpr(S.expr);
+      sub = OPS.test(S.expr) ? '= ' + fmt(amt, c) : '';
+    } else {
+      big = fmt(convert(amt, S.active, c), c);
+      const r = convert(1, S.active, c);
+      sub = isFinite(r) ? '1 ' + S.active + ' = ' + fmtRate(r) + ' ' + c : '';
+    }
+    const ctl = S.editing ? `<div class="ctl"><button data-act="up" data-i="${i}" ${i ? '' : 'disabled style="opacity:.3"'}>▲</button><button class="rm" data-act="rm" data-i="${i}">✕</button></div>` : '';
+    return `<div class="row${act ? ' active' : ''}" data-code="${c}">${ctl}<span class="flag">${flagOf(c)}</span><div class="cc"><b>${c}</b><small>${esc(nameOf(c))}</small></div><div class="val"><div class="big">${big}</div>${sub ? '<small>' + sub + '</small>' : ''}</div></div>`;
+  }).join('');
+  h += '<button class="addrow" data-act="add">+ Add currency</button>';
+  $('#list').innerHTML = h;
+}
+
+function renderCustom() {
+  let h = '';
+  if (!S.custom.length) h = '<div class="empty"><b>No custom rates yet.</b><br>Tap <b>+ Add</b> to save the rate you actually exchanged at (e.g. a money changer). You can enter the rate directly, or the amounts you gave and got. Convert with it any time, offline.</div>';
+  h += S.custom.map(x => {
+    const open = S.openId === x.id;
+    const mk = convert(1, x.from, x.to);
+    let mkt = '';
+    if (isFinite(mk)) {
+      const d = (x.rate - mk) / mk * 100;
+      mkt = `<div class="mkt">Market 1 ${x.from} = ${fmtRate(mk)} ${x.to} · <span class="${d >= 0 ? 'pos' : 'neg'}">${d >= 0 ? '+' : ''}${d.toFixed(2)}%</span> vs market</div>`;
+    }
+    const when = x.date ? new Date(x.date + 'T00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    let conv = '';
+    if (open) {
+      const v = evalExpr(S.cExpr);
+      const fromTxt = S.cSide === 'from' ? fmtExpr(S.cExpr) : fmt(v / x.rate, x.from);
+      const toTxt = S.cSide === 'to' ? fmtExpr(S.cExpr) : fmt(v * x.rate, x.to);
+      conv = `<div class="conv">
+        <div class="f${S.cSide === 'from' ? ' on' : ''}" data-side="from"><span class="flag">${flagOf(x.from)}</span><b>${x.from}</b><div class="big">${fromTxt}</div></div>
+        <div class="f${S.cSide === 'to' ? ' on' : ''}" data-side="to"><span class="flag">${flagOf(x.to)}</span><b>${x.to}</b><div class="big">${toTxt}</div></div>
+      </div>
+      <div class="cact"><button data-act="cedit" data-id="${x.id}">Edit</button><button class="del" data-act="cdel" data-id="${x.id}">Delete</button></div>`;
+    }
+    return `<div class="card${open ? ' open' : ''}" data-id="${x.id}">
+      <div class="pair">${flagOf(x.from)} ${x.from} → ${flagOf(x.to)} ${x.to}<span class="when">${when}</span></div>
+      <div class="rate">1 ${x.from} = ${fmtRate(x.rate)} ${x.to}</div>
+      <div class="inv">1 ${x.to} = ${fmtRate(1 / x.rate)} ${x.from}${x.note ? ' · ' + esc(x.note) : ''}</div>
+      ${mkt}${conv}</div>`;
+  }).join('');
+  $('#list').innerHTML = h;
+}
+
+function render() {
+  document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
+  $('#hBtn').textContent = S.mode === 'latest' ? (S.editing ? 'Done' : 'Edit') : '+ Add';
+  renderStatus();
+  if (S.mode === 'latest') renderLatest(); else renderCustom();
+  $('#pad').classList.toggle('hidden', S.mode === 'custom' && !S.openId);
+}
+
+/* ---------- keypad ---------- */
+function press(k) {
+  const custom = S.mode === 'custom';
+  if (custom && !S.openId) return;
+  let e = custom ? S.cExpr : S.expr;
+  const digit = /^(\d|00)$/.test(k) || k === '.';
+  if (S.fresh && digit) e = '0';
+  S.fresh = false;
+  if (k === 'C') e = '0';
+  else if (k === '⌫') e = e.length > 1 ? e.slice(0, -1) : '0';
+  else if (k === '=') { const v = evalExpr(e); e = isFinite(v) ? String(+v.toFixed(8)) : '0'; S.fresh = true; }
+  else if (OPS.test(k)) { e = /[+−×÷.]$/.test(e) ? e.slice(0, -1) + k : e + k; }
+  else if (k === '.') { const seg = e.split(OPS).pop(); if (!seg.includes('.')) e += seg === '' ? '0.' : '.'; }
+  else {
+    const seg = e.split(OPS).pop();
+    if (seg === '0') e = e.slice(0, -1) + (k === '00' ? '0' : k);
+    else if (seg === '' && k === '00') e += '0';
+    else e += k;
+  }
+  if (e.length > 40) return;
+  if (custom) S.cExpr = e; else S.expr = e;
+  save(); render();
+}
+$('#pad').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) press(b.dataset.k); });
+document.addEventListener('keydown', ev => {
+  if (ev.target.matches('input,select')) return;
+  const map = { '*': '×', '/': '÷', '-': '−', '+': '+', 'Enter': '=', '=': '=', 'Backspace': '⌫', 'Escape': 'C', '.': '.', ',': '.' };
+  const k = /^\d$/.test(ev.key) ? ev.key : map[ev.key];
+  if (k) { ev.preventDefault(); press(k); }
+});
+
+/* ---------- latest-mode list ---------- */
+function setActive(c) {
+  if (c === S.active) return;
+  const v = convert(evalExpr(S.expr), S.active, c);
+  if (isFinite(v)) S.expr = plain(v, c);
+  S.active = c; S.fresh = true; save(); render();
+}
+$('#list').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-act]');
+  if (S.mode === 'latest') {
+    if (b) {
+      const i = +b.dataset.i, a = b.dataset.act;
+      if (a === 'add') return openPicker();
+      if (a === 'rm') {
+        if (S.favs.length <= 2) return toast('Keep at least 2 currencies');
+        const c = S.favs[i]; S.favs.splice(i, 1);
+        if (c === S.active) { S.active = S.favs[0]; S.expr = '1'; }
+      }
+      if (a === 'up' && i > 0) [S.favs[i - 1], S.favs[i]] = [S.favs[i], S.favs[i - 1]];
+      save(); return render();
+    }
+    const row = ev.target.closest('.row'); if (row) setActive(row.dataset.code);
+    return;
+  }
+  // custom mode
+  if (b) {
+    const x = S.custom.find(y => y.id === b.dataset.id);
+    if (b.dataset.act === 'cedit') return openSheet(x);
+    if (b.dataset.act === 'cdel' && confirm('Delete this custom rate?')) { S.custom = S.custom.filter(y => y.id !== x.id); S.openId = null; save(); render(); }
+    return;
+  }
+  const f = ev.target.closest('.f');
+  const card = ev.target.closest('.card'); if (!card) return;
+  const x = S.custom.find(y => y.id === card.dataset.id);
+  if (f) {
+    const side = f.dataset.side;
+    if (side !== S.cSide) {
+      const v = evalExpr(S.cExpr);
+      S.cExpr = side === 'to' ? plain(v * x.rate, x.to) : plain(v / x.rate, x.from);
+      S.cSide = side; S.fresh = true; render();
+    }
+    return;
+  }
+  if (S.openId === x.id) { S.openId = null; }
+  else { S.openId = x.id; S.cSide = 'from'; S.cExpr = '100'; S.fresh = true; }
+  render();
+});
+
+/* ---------- picker ---------- */
+function renderPicker() {
+  const q = $('#pSearch').value.trim().toLowerCase();
+  $('#pList').innerHTML = allCodes().filter(c => !q || c.toLowerCase().includes(q) || nameOf(c).toLowerCase().includes(q)).map(c =>
+    `<div class="pi" data-code="${c}"><span class="flag">${flagOf(c)}</span><div><b>${c}</b><small>${esc(nameOf(c))}</small></div>${S.favs.includes(c) ? '<span class="tick">✓</span>' : ''}</div>`).join('');
+}
+function openPicker() { $('#pSearch').value = ''; renderPicker(); $('#picker').classList.remove('hidden'); }
+$('#pSearch').addEventListener('input', renderPicker);
+$('#pList').addEventListener('click', ev => {
+  const it = ev.target.closest('.pi'); if (!it) return;
+  const c = it.dataset.code, i = S.favs.indexOf(c);
+  if (i >= 0) { if (S.favs.length > 2 && c !== S.active) S.favs.splice(i, 1); }
+  else S.favs.push(c);
+  save(); renderPicker(); render();
+});
+$('#pClose').addEventListener('click', () => $('#picker').classList.add('hidden'));
+
+/* ---------- custom-rate sheet ---------- */
+function fillSelects(from, to) {
+  const opts = allCodes().map(c => `<option value="${c}">${c} · ${esc(nameOf(c))}</option>`).join('');
+  $('#fFrom').innerHTML = opts; $('#fTo').innerHTML = opts;
+  $('#fFrom').value = from; $('#fTo').value = to;
+  syncLabels();
+}
+function syncLabels() {
+  $('#lFrom').textContent = $('#lGave').textContent = $('#fFrom').value;
+  $('#lTo').textContent = $('#lGot').textContent = $('#fTo').value;
+}
+function openSheet(x) {
+  S.editId = x ? x.id : null;
+  $('#sTitle').textContent = x ? 'Edit custom rate' : 'Add custom rate';
+  fillSelects(x ? x.from : (S.favs.find(c => c !== 'IDR') || 'USD'), x ? x.to : 'IDR');
+  $('#fRate').value = x ? String(x.rate) : '';
+  $('#fNote').value = x ? x.note || '' : '';
+  $('#fDate').value = x ? x.date || today() : today();
+  $('#fGave').value = $('#fGot').value = ''; $('#fCalc').open = false;
+  $('#sheet').classList.remove('hidden');
+}
+const num = s => parseFloat(String(s).replace(/,/g, ''));
+$('#fFrom').addEventListener('change', syncLabels);
+$('#fTo').addEventListener('change', syncLabels);
+$('#fSwap').addEventListener('click', () => {
+  const a = $('#fFrom').value; $('#fFrom').value = $('#fTo').value; $('#fTo').value = a;
+  const r = num($('#fRate').value); if (r > 0) $('#fRate').value = String(+(1 / r).toPrecision(8));
+  syncLabels();
+});
+$('#fLatest').addEventListener('click', () => {
+  const v = convert(1, $('#fFrom').value, $('#fTo').value);
+  if (isFinite(v)) $('#fRate').value = String(+v.toPrecision(8)); else toast('No market rate saved yet');
+});
+function calcFromAmounts() {
+  const g = num($('#fGave').value), t = num($('#fGot').value);
+  if (g > 0 && t > 0) $('#fRate').value = String(+(t / g).toPrecision(8));
+}
+$('#fGave').addEventListener('input', calcFromAmounts);
+$('#fGot').addEventListener('input', calcFromAmounts);
+$('#fCancel').addEventListener('click', () => $('#sheet').classList.add('hidden'));
+$('#fSave').addEventListener('click', () => {
+  const from = $('#fFrom').value, to = $('#fTo').value, rate = num($('#fRate').value);
+  if (from === to) return toast('Pick two different currencies');
+  if (!(rate > 0)) return toast('Enter a rate above 0');
+  const item = { id: S.editId || String(Date.now()), from, to, rate, note: $('#fNote').value.trim(), date: $('#fDate').value };
+  if (S.editId) S.custom = S.custom.map(y => y.id === S.editId ? item : y);
+  else S.custom.unshift(item);
+  S.openId = item.id; S.cSide = 'from'; S.cExpr = '100'; S.fresh = true;
+  save(); $('#sheet').classList.add('hidden'); render();
+});
+document.querySelectorAll('.sheet').forEach(s => s.addEventListener('click', ev => { if (ev.target === s) s.classList.add('hidden'); }));
+
+/* ---------- header ---------- */
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.mode; S.editing = false; S.fresh = true; save(); render(); }));
+$('#hBtn').addEventListener('click', () => { if (S.mode === 'latest') { S.editing = !S.editing; render(); } else openSheet(null); });
+$('#refresh').addEventListener('click', () => fetchRates(true));
+window.addEventListener('online', () => { renderStatus(); fetchRates(false); });
+window.addEventListener('offline', renderStatus);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { render(); maybeRefresh(); } });
+function maybeRefresh() { if (!S.rates || Date.now() - S.rates.fetched > 60 * 60 * 1000) fetchRates(false); }
+
+if (!S.favs.includes(S.active)) S.active = S.favs[0];
+render();
+maybeRefresh();
+setInterval(renderStatus, 60000);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
