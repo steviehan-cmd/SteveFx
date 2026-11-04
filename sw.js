@@ -1,6 +1,6 @@
 // SteveFx service worker: serves the app from cache so it opens offline.
 // Bump VERSION when you change files, so phones pick up the update.
-const VERSION = 'stevefx-v1';
+const VERSION = 'stevefx-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
