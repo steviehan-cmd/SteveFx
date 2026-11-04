@@ -1,6 +1,6 @@
 {
-  "name": "EZ FX Currency Converter",
-  "short_name": "EZ FX",
+  "name": "SteveFx",
+  "short_name": "SteveFx",
   "description": "Offline currency converter with latest and custom rates",
   "start_url": "./",
   "scope": "./",

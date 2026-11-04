@@ -7,11 +7,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="EZ FX">
+<meta name="apple-mobile-web-app-title" content="SteveFx">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
-<title>EZ FX</title>
+<title>SteveFx</title>
 <style>
 :root{--bg:#f3f5f7;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e3e7ec;--acc:#0b8f63;--acc-soft:#e2f5ed;--key:#fff;--key2:#e6ebf0;--up:#059669;--down:#dc2626;--shadow:0 1px 2px rgba(0,0,0,.06)}
 @media (prefers-color-scheme:dark){:root{--bg:#0b1117;--card:#141c25;--text:#e8edf2;--muted:#8794a1;--line:#222c37;--acc:#34d399;--acc-soft:#10291f;--key:#18212b;--key2:#222e3b;--up:#34d399;--down:#f87171;--shadow:none}}
@@ -105,7 +105,7 @@ summary{color:var(--acc);font-weight:700;padding:2px 0 10px}
 </head>
 <body>
 <header>
-  <h1>EZ <span>FX</span></h1>
+  <h1>Steve<span>Fx</span></h1>
   <div class="seg"><button data-mode="latest">Latest</button><button data-mode="custom">Custom</button></div>
   <button id="hBtn">Edit</button>
 </header>
@@ -155,8 +155,8 @@ summary{color:var(--acc);font-weight:700;padding:2px 0 10px}
 'use strict';
 const $ = s => document.querySelector(s);
 const LS = {
-  get(k, d) { try { const v = localStorage.getItem('ezfx.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem('ezfx.' + k, JSON.stringify(v)); } catch (e) {} }
+  get(k, d) { try { const v = localStorage.getItem('stevefx.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('stevefx.' + k, JSON.stringify(v)); } catch (e) {} }
 };
 const ZERO = new Set(['IDR','JPY','KRW','VND','CLP','HUF','ISK','PYG','UGX','LAK','MMK','KHR','IRR','COP','KZT','UZS']);
 const COMMON = ['USD','EUR','GBP','JPY','CNY','SGD','MYR','THB','IDR','AUD','NZD','HKD','KRW','INR','PHP','VND','TWD','CHF','CAD','AED','SAR','TRY','ZAR'];
