@@ -126,8 +126,8 @@ body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
   <div class="seg"><button data-mode="latest">Latest</button><button data-mode="custom">Custom</button></div>
   <button id="refresh" class="hb">↻ Refresh</button><button id="manage" class="hb hidden">Rates</button>
 </header>
-<div id="status" class="statusline"><span class="dot" id="dot"></span><span id="stamp">No rates yet</span><button class="arrange">Arrange</button></div>
-<div id="cstatus" class="statusline hidden"><span id="cstamp"></span><button class="arrange">Arrange</button></div>
+<div id="status" class="statusline"><span class="dot" id="dot"></span><span id="stamp">No rates yet</span><button class="arrange">⇅ Order</button></div>
+<div id="cstatus" class="statusline hidden"><span id="cstamp"></span><button class="arrange">⇅ Order</button></div>
 <main id="list"></main>
 <div id="pad">
   <button id="padHandle" aria-label="Show or hide keypad"></button>
@@ -262,10 +262,6 @@ function ago(t) {
   return Math.round(h / 24) + ' days ago';
 }
 function fmtDate(s) { return s ? new Date(s + 'T00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
-function vsMarket(x) {   // % difference of a custom rate vs the saved market rate, or NaN
-  const mk = convert(1, x.from, x.to);
-  return isFinite(mk) ? (x.rate - mk) / mk * 100 : NaN;
-}
 function pctHtml(d, words) {
   if (!isFinite(d)) return '';
   const p = d >= 0;
@@ -371,8 +367,7 @@ function renderCustom() {
     if (act) { big = fmtExpr(S.cExpr); smalls = [OPS.test(S.cExpr) ? '= ' + fmt(v, c) : '']; }
     else if (d) {
       big = fmt(v * d.r, c);
-      const p = vsMarket(d.x);
-      smalls = ['1 ' + a + ' = ' + fmtRate(d.r) + ' ' + c, isFinite(p) ? pctHtml(p) + ' vs market' : ''];
+      smalls = ['1 ' + a + ' = ' + fmtRate(d.r) + ' ' + c];
     } else { big = '—'; smalls = ['No rate with ' + a]; }
     const ctl = S.editing ? `<div class="ctl"><button data-act="up" data-i="${i}" ${i ? '' : 'disabled style="opacity:.3"'}>▲</button></div>` : '';
     return rowHtml({ attrs: `data-code="${c}"`, active: act, cls: !act && !d ? 'dim' : '', flag: c, title: c, sub: nameOf(c), big, smalls, pre: ctl });
@@ -385,7 +380,7 @@ function render() {
   document.body.classList.toggle('custom', custom);
   document.body.classList.toggle('editing', S.editing);
   document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
-  document.querySelectorAll('.arrange').forEach(b => { b.textContent = S.editing ? 'Done' : 'Arrange'; b.classList.toggle('hidden', custom && !S.custom.length); });
+  document.querySelectorAll('.arrange').forEach(b => { b.textContent = S.editing ? 'Done' : '⇅ Order'; b.classList.toggle('hidden', custom && !S.custom.length); });
   $('#refresh').classList.toggle('hidden', custom);
   $('#status').classList.toggle('hidden', custom);
   $('#cstatus').classList.toggle('hidden', !custom);
@@ -527,7 +522,7 @@ $('#list').addEventListener('click', ev => {
 /* ---------- "Your custom rates" (Rates button): tap a rate to edit it; the small ✕ deletes it ---------- */
 function renderRates() {
   $('#rList').innerHTML = S.custom.map(x => `<div class="rr" data-id="${x.id}">${
-    rowHtml({ flag: x.from, title: x.from + ' → ' + x.to, sub: [x.note, fmtDate(x.date)].filter(Boolean).join(' · '), big: fmtRate(x.rate), smalls: [pctHtml(vsMarket(x))],
+    rowHtml({ flag: x.from, title: x.from + ' → ' + x.to, sub: [x.note, fmtDate(x.date)].filter(Boolean).join(' · '), big: fmtRate(x.rate),
       post: '<div class="ra"><button class="d" data-act="del" aria-label="Delete">✕</button></div>' })
   }</div>`).join('') + '<button class="addrow" data-act="addrate">+ Add custom rate</button>';
 }
@@ -535,17 +530,17 @@ function openRates() { renderRates(); $('#rates').classList.remove('hidden'); }
 function closeRates() { $('#rates').classList.add('hidden'); }
 $('#rList').addEventListener('click', ev => {
   const b = ev.target.closest('[data-act]');
-  if (b && b.dataset.act === 'addrate') { closeRates(); return openSheet(null); }
+  if (b && b.dataset.act === 'addrate') { closeRates(); return openSheet(null, true); }
   const el = ev.target.closest('.rr'); if (!el) return;
   const x = S.custom.find(y => y.id === el.dataset.id); if (!x) return;
   if (b && b.dataset.act === 'del') {
     if (!confirm(`Delete the ${x.from} → ${x.to} rate?`)) return;
     S.custom = S.custom.filter(y => y.id !== x.id);
     save(); render();
-    if (S.custom.length) renderRates(); else closeRates();
+    renderRates();   // stay in the list, even when it is now empty
     return;
   }
-  closeRates(); openSheet(x);
+  closeRates(); openSheet(x, true);
 });
 $('#rClose').addEventListener('click', closeRates);
 $('#manage').addEventListener('click', openRates);
@@ -588,8 +583,9 @@ function syncForm() {
   $('#fDup').textContent = dup ? `You already have a ${dup.from} → ${dup.to} rate (${fmtRate(dup.rate)}). Saving will replace it.` : '';
   updMkt();
 }
-function openSheet(x) {
-  S.editId = x ? x.id : null;
+// fromRates: the form was opened from the Rates list, so closing it goes back there.
+function openSheet(x, fromRates) {
+  S.editId = x ? x.id : null; S.fromRates = !!fromRates;
   $('#sTitle').textContent = x ? 'Edit custom rate' : 'Add custom rate';
   if (x) { F.from = x.from; F.to = x.to; }
   else {
@@ -639,7 +635,8 @@ function calcFromAmounts() {
 $('#fRate').addEventListener('input', updMkt);
 $('#fGave').addEventListener('input', calcFromAmounts);
 $('#fGot').addEventListener('input', calcFromAmounts);
-$('#fCancel').addEventListener('click', () => $('#sheet').classList.add('hidden'));
+function closeSheet() { $('#sheet').classList.add('hidden'); if (S.fromRates) openRates(); }
+$('#fCancel').addEventListener('click', closeSheet);
 $('#fSave').addEventListener('click', () => {
   const from = F.from, to = F.to, rate = num($('#fRate').value);
   if (from === to) return toast('Pick two different currencies');
@@ -656,11 +653,11 @@ $('#fSave').addEventListener('click', () => {
     const g = num($('#fGave').value);
     S.cActive = from; S.cExpr = g > 0 ? plain(g, from) : '100'; S.fresh = true;
   }
-  save(); $('#sheet').classList.add('hidden'); render();
+  save(); render(); closeSheet();
 });
 document.querySelectorAll('.sheet').forEach(s => s.addEventListener('click', ev => {
   if (ev.target !== s) return;
-  if (s.id === 'picker') closePicker(); else s.classList.add('hidden');
+  if (s.id === 'picker') closePicker(); else if (s.id === 'sheet') closeSheet(); else s.classList.add('hidden');
 }));
 
 /* ---------- header ---------- */
