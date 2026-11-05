@@ -55,15 +55,12 @@ main{flex:1;overflow-y:auto;padding:0 12px 12px;-webkit-overflow-scrolling:touch
 .empty b{color:var(--text)}
 .pos{color:var(--up);font-weight:700}.neg{color:var(--down);font-weight:700}
 .hidden{display:none!important}
-/* "Your custom rates" list: swipe left or long-press for Edit/Delete */
-#rList{flex:1;overflow-y:auto;-webkit-touch-callout:none}
-.sw{position:relative;overflow:hidden;border-radius:14px;margin-bottom:7px}
-.sw .acts{position:absolute;right:0;top:0;bottom:0;display:flex;visibility:hidden}
-.sw.open .acts{visibility:visible}
-.sw .acts button{border:0;width:72px;font-weight:700;font-size:14px;color:#fff}
-.sw .acts .e{background:#64748b}.sw .acts .d{background:#dc2626}
-.sw .row{margin:0;position:relative;background:var(--bg);touch-action:pan-y;transition:transform .2s}
-.sw.drag .row{transition:none}
+/* "Your custom rates" list: small edit / delete buttons beside each rate */
+#rList{flex:1;overflow-y:auto}
+#rList .row{background:var(--bg)}
+.ra{display:flex;flex-direction:column;gap:6px;flex:none;margin-left:2px}
+.ra button{border:0;background:var(--key2);width:26px;height:26px;border-radius:7px;font-size:13px;line-height:1;padding:0;color:var(--muted)}
+.ra .d{color:var(--down)}
 .hint{color:var(--muted);font-size:12px;text-align:center;margin:4px 0 10px}
 .mktline{font-size:13px;color:var(--muted);margin:-4px 0 12px;line-height:1.45}
 .mktline:empty{display:none}
@@ -126,10 +123,10 @@ body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
 <header>
   <h1>Steve<span>Fx</span></h1>
   <div class="seg"><button data-mode="latest">Latest</button><button data-mode="custom">Custom</button></div>
-  <button id="hBtn">Edit</button>
+  <button id="hBtn">Arrange</button>
 </header>
 <div id="status" class="statusline"><span class="dot" id="dot"></span><span id="stamp">No rates yet</span><button id="refresh">↻ Refresh</button></div>
-<div id="cstatus" class="statusline hidden"><span id="cstamp"></span><button id="manage">Manage</button></div>
+<div id="cstatus" class="statusline hidden"><span id="cstamp"></span><button id="manage">Rates</button></div>
 <main id="list"></main>
 <div id="pad">
   <button id="padHandle" aria-label="Show or hide keypad"></button>
@@ -274,7 +271,7 @@ function pctHtml(d, words) {
   return `<span class="${p ? 'pos' : 'neg'}">${p ? '+' : ''}${d.toFixed(2)}%${words ? (p ? ' better' : ' worse') : ''}</span>`;
 }
 function rowHtml(o) {    // one currency row; used by Latest, Custom and the custom-rates list
-  return `<div class="row${o.active ? ' active' : ''}${o.cls ? ' ' + o.cls : ''}" ${o.attrs || ''}>${o.pre || ''}<span class="flag">${flagOf(o.flag)}</span><div class="cc"><b>${o.title}</b><small>${esc(o.sub)}</small></div><div class="val"><div class="big">${o.big}</div>${(o.smalls || []).filter(Boolean).map(s => '<small>' + s + '</small>').join('')}</div></div>`;
+  return `<div class="row${o.active ? ' active' : ''}${o.cls ? ' ' + o.cls : ''}" ${o.attrs || ''}>${o.pre || ''}<span class="flag">${flagOf(o.flag)}</span><div class="cc"><b>${o.title}</b><small>${esc(o.sub)}</small></div><div class="val"><div class="big">${o.big}</div>${(o.smalls || []).filter(Boolean).map(s => '<small>' + s + '</small>').join('')}</div>${o.post || ''}</div>`;
 }
 function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
@@ -387,7 +384,7 @@ function render() {
   document.body.classList.toggle('custom', custom);
   document.body.classList.toggle('editing', S.editing);
   document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
-  $('#hBtn').textContent = S.editing ? 'Done' : 'Edit';
+  $('#hBtn').textContent = S.editing ? 'Done' : 'Arrange';
   $('#hBtn').classList.toggle('hidden', custom && !S.custom.length);
   $('#status').classList.toggle('hidden', custom);
   $('#cstatus').classList.toggle('hidden', !custom);
@@ -504,78 +501,19 @@ $('#list').addEventListener('click', ev => {
   const row = ev.target.closest('.row'); if (row && !S.editing) setCActive(row.dataset.code);
 });
 
-/* ---------- "Your custom rates" (Manage): tap to jump to it, swipe left or long-press to edit/delete ---------- */
-const SWIPE = -144;   // width of the Edit + Delete buttons
+/* ---------- "Your custom rates" (Rates button): tap a rate to jump to it; small ✎ / ✕ buttons edit or delete ---------- */
 function renderRates() {
-  const hint = S.custom.length && !LS.get('swiped', false) ? '<div class="hint">Swipe a rate left, or long-press it, to edit or delete</div>' : '';
-  $('#rList').innerHTML = S.custom.map(x => `<div class="sw" data-id="${x.id}"><div class="acts"><button class="e" data-act="edit">Edit</button><button class="d" data-act="del">Delete</button></div>${
-    rowHtml({ flag: x.from, title: x.from + ' → ' + x.to, sub: [x.note, fmtDate(x.date)].filter(Boolean).join(' · '), big: fmtRate(x.rate), smalls: [pctHtml(vsMarket(x))] })
-  }</div>`).join('') + hint + '<button class="addrow" data-act="addrate">+ Add custom rate</button>';
+  $('#rList').innerHTML = S.custom.map(x => `<div class="rr" data-id="${x.id}">${
+    rowHtml({ flag: x.from, title: x.from + ' → ' + x.to, sub: [x.note, fmtDate(x.date)].filter(Boolean).join(' · '), big: fmtRate(x.rate), smalls: [pctHtml(vsMarket(x))],
+      post: '<div class="ra"><button class="e" data-act="edit" aria-label="Edit">✎</button><button class="d" data-act="del" aria-label="Delete">✕</button></div>' })
+  }</div>`).join('') + '<button class="addrow" data-act="addrate">+ Add custom rate</button>';
 }
 function openRates() { renderRates(); $('#rates').classList.remove('hidden'); }
 function closeRates() { $('#rates').classList.add('hidden'); }
-function setSwipe(el, off, dragging) {
-  el.querySelector('.row').style.transform = off ? `translateX(${off}px)` : '';
-  el.classList.toggle('open', off < 0);
-  el.classList.toggle('drag', !!dragging);
-}
-function closeSwipes(except) { document.querySelectorAll('#rList .sw.open').forEach(e => { if (e !== except) setSwipe(e, 0); }); }
-let sw = null, noClickUntil = 0;
-function swStart(el, x, y) {
-  sw = { el, x0: x, y0: y, base: el.classList.contains('open') ? SWIPE : 0, off: 0, dir: 0, long: false };
-  sw.timer = setTimeout(() => {       // long-press also opens Edit/Delete
-    if (!sw || sw.dir) return;
-    closeSwipes(sw.el); setSwipe(sw.el, SWIPE); sw.long = true; LS.set('swiped', true);
-    if (navigator.vibrate) navigator.vibrate(12);
-  }, 450);
-}
-function swMove(x, y) {                // returns true while this is a sideways swipe (page mustn't scroll)
-  if (!sw) return false;
-  if (sw.long) return true;
-  const dx = x - sw.x0, dy = y - sw.y0;
-  if (!sw.dir) {
-    if (Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy)) { sw.dir = 1; clearTimeout(sw.timer); closeSwipes(sw.el); }
-    else if (Math.abs(dy) > 6) { clearTimeout(sw.timer); sw = null; return false; }
-    else return false;
-  }
-  sw.off = Math.max(SWIPE - 24, Math.min(0, sw.base + dx));
-  setSwipe(sw.el, sw.off, true);
-  return true;
-}
-function swEnd() {
-  if (!sw) return;
-  clearTimeout(sw.timer);
-  if (sw.dir) { const open = sw.off < SWIPE / 2; setSwipe(sw.el, open ? SWIPE : 0); if (open) LS.set('swiped', true); }
-  if (sw.dir || sw.long) noClickUntil = Date.now() + 400;   // lifting the finger isn't a tap
-  sw = null;
-}
-const rl = $('#rList');
-// Touch (phones): handled directly so Android/iPhone don't treat the swipe as a scroll.
-rl.addEventListener('touchstart', ev => {
-  const el = ev.target.closest('.sw');
-  if (el && !ev.target.closest('.acts') && ev.touches.length === 1) swStart(el, ev.touches[0].clientX, ev.touches[0].clientY);
-}, { passive: true });
-rl.addEventListener('touchmove', ev => {
-  if (sw && swMove(ev.touches[0].clientX, ev.touches[0].clientY) && ev.cancelable) ev.preventDefault();
-}, { passive: false });
-rl.addEventListener('touchend', swEnd);
-rl.addEventListener('touchcancel', swEnd);
-// Mouse (PC): click-and-drag works the same way.
-let touchedAt = 0;
-rl.addEventListener('touchstart', () => { touchedAt = Date.now(); }, { passive: true });
-rl.addEventListener('mousedown', ev => {
-  if (Date.now() - touchedAt < 800) return;   // ignore the fake mouse events phones send after a touch
-  const el = ev.target.closest('.sw');
-  if (el && !ev.target.closest('.acts')) swStart(el, ev.clientX, ev.clientY);
-});
-window.addEventListener('mousemove', ev => { if (sw) swMove(ev.clientX, ev.clientY); });
-window.addEventListener('mouseup', () => { if (Date.now() - touchedAt >= 800) swEnd(); });
-rl.addEventListener('contextmenu', ev => ev.preventDefault());
-rl.addEventListener('click', ev => {
-  if (Date.now() < noClickUntil && !ev.target.closest('.acts')) return;   // Edit/Delete taps always count
+$('#rList').addEventListener('click', ev => {
   const b = ev.target.closest('[data-act]');
   if (b && b.dataset.act === 'addrate') { closeRates(); return openSheet(null); }
-  const el = ev.target.closest('.sw'); if (!el) return;
+  const el = ev.target.closest('.rr'); if (!el) return;
   const x = S.custom.find(y => y.id === el.dataset.id); if (!x) return;
   if (b && b.dataset.act === 'edit') { closeRates(); return openSheet(x); }
   if (b && b.dataset.act === 'del') {
@@ -585,7 +523,6 @@ rl.addEventListener('click', ev => {
     if (S.custom.length) renderRates(); else closeRates();
     return;
   }
-  if (el.classList.contains('open')) return setSwipe(el, 0);   // tap on a swiped row just closes it
   closeRates();
   if (S.cActive !== x.from && S.cActive !== x.to) setCActive(x.from); else render();
 });
