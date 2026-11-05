@@ -74,9 +74,9 @@ main{flex:1;overflow-y:auto;padding:0 12px 12px;-webkit-overflow-scrolling:touch
 #keys{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:50px;gap:6px;padding-bottom:10px;max-height:284px;overflow:hidden;transition:max-height .25s ease,padding .25s ease}
 #pad.collapsed #keys{max-height:0;padding-bottom:0}
 #keys.drag{transition:none}
-#keys button{border:0;border-radius:12px;background:var(--tkey);font-size:22px;touch-action:manipulation}
-#keys button:active{filter:brightness(.9)}
-@media (prefers-color-scheme:dark){#keys button:active{filter:brightness(1.35)}}
+#keys button{border:0;border-radius:12px;background:var(--tkey);font-size:22px;touch-action:none;-webkit-touch-callout:none;transition:transform .08s ease,filter .08s ease}
+#keys button.press{filter:brightness(.82);transform:scale(.94)}
+@media (prefers-color-scheme:dark){#keys button.press{filter:brightness(1.6)}}
 #keys .op{background:var(--tkey2);color:var(--acc);font-weight:600}
 #keys .eq{grid-row:span 2;background:var(--acc);color:var(--on-acc);font-weight:700}
 /* sheets */
@@ -425,7 +425,27 @@ function press(k) {
   if (custom) S.cExpr = e; else S.expr = e;
   save(); render();
 }
-$('#keys').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) press(b.dataset.k); });
+// Keys type the moment a finger touches them (not on "click"), so fast or overlapping taps
+// and a slightly sliding thumb never get dropped. Holding ⌫ keeps deleting.
+const held = new Map();   // pointerId -> { b, t0, rep }
+function keyUp(ev) {
+  const h = held.get(ev.pointerId); if (!h) return;
+  held.delete(ev.pointerId); clearTimeout(h.rep); clearInterval(h.rep);
+  setTimeout(() => h.b.classList.remove('press'), Math.max(0, 110 - (Date.now() - h.t0)));   // let quick taps flash
+}
+$('#keys').addEventListener('pointerdown', ev => {
+  const b = ev.target.closest('button[data-k]');
+  if (!b || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+  ev.preventDefault();
+  b.classList.add('press');
+  press(b.dataset.k);
+  const h = { b, t0: Date.now(), rep: null };
+  if (b.dataset.k === '⌫') h.rep = setTimeout(() => { h.rep = setInterval(() => press('⌫'), 70); }, 450);
+  held.set(ev.pointerId, h);
+});
+window.addEventListener('pointerup', keyUp);
+window.addEventListener('pointercancel', keyUp);
+$('#keys').addEventListener('contextmenu', ev => ev.preventDefault());
 document.addEventListener('keydown', ev => {
   if (ev.target.matches('input,select') || S.editing) return;
   if (!$('#sheet').classList.contains('hidden') || !$('#picker').classList.contains('hidden') || !$('#rates').classList.contains('hidden')) return;
