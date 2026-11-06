@@ -1,8 +1,10 @@
 # SteveFx — offline currency converter
 
-A phone app (PWA) with two modes:
-- **Latest**: market rates, downloaded when online and saved for offline use.
-- **Custom**: rates you enter yourself (e.g. what the money changer gave you), compared against market.
+A phone app (PWA) with two rate modes, picked from the dropdown at the top:
+- **Market**: market rates, downloaded when online and saved for offline use.
+- **Mine**: rates you enter yourself (e.g. what the money changer gave you), compared against market.
+
+Tap ☆ on the highlighted row to save a price (with item and shop). **★ Compare** groups the same item across shops, cheapest first, in whichever currency you pick, converted with the rates of the mode you are in.
 
 ## Put it on GitHub Pages
 1. Create a new public repo on GitHub, `SteveFx`.

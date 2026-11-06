@@ -13,8 +13,8 @@
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <title>SteveFx</title>
 <style>
-:root{--bg:#f3f5f7;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e3e7ec;--acc:#0b8f63;--acc-soft:#e2f5ed;--key:#fff;--key2:#e6ebf0;--up:#059669;--down:#dc2626;--shadow:0 1px 2px rgba(0,0,0,.06);--on-acc:#fff;--tray:#fff;--tkey:#eef1f4;--tkey2:#e2e7ec;--handle:#d5dbe1;--tshadow:0 -4px 16px rgba(0,0,0,.08)}
-@media (prefers-color-scheme:dark){:root{--bg:#0b1117;--card:#141c25;--text:#e8edf2;--muted:#8794a1;--line:#222c37;--acc:#34d399;--acc-soft:#10291f;--key:#18212b;--key2:#222e3b;--up:#34d399;--down:#f87171;--shadow:none;--on-acc:#062016;--tray:#18222d;--tkey:#223040;--tkey2:#1a2734;--handle:#3a4756;--tshadow:0 -6px 20px rgba(0,0,0,.45)}}
+:root{--bg:#f3f5f7;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e3e7ec;--acc:#0b8f63;--acc-soft:#e2f5ed;--key:#fff;--key2:#e6ebf0;--up:#059669;--down:#dc2626;--shadow:0 1px 2px rgba(0,0,0,.06);--on-acc:#fff;--tray:#fff;--tkey:#eef1f4;--tkey2:#e2e7ec;--handle:#d5dbe1;--tshadow:0 -4px 16px rgba(0,0,0,.08);--star:#b45309;--star-soft:#fef3c7}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1117;--card:#141c25;--text:#e8edf2;--muted:#8794a1;--line:#222c37;--acc:#34d399;--acc-soft:#10291f;--key:#18212b;--key2:#222e3b;--up:#34d399;--down:#f87171;--shadow:none;--on-acc:#062016;--tray:#18222d;--tkey:#223040;--tkey2:#1a2734;--handle:#3a4756;--tshadow:0 -6px 20px rgba(0,0,0,.45);--star:#fbbf24;--star-soft:#33290f}}
 /* Custom mode uses violet instead of green */
 body.custom{--acc:#7c3aed;--acc-soft:#f1eafe;--on-acc:#fff}
 @media (prefers-color-scheme:dark){body.custom{--acc:#a78bfa;--acc-soft:#221a3d;--on-acc:#1b1236}}
@@ -26,16 +26,29 @@ input,select{font:inherit;-webkit-user-select:text;user-select:text}
 header{display:flex;align-items:center;gap:10px;padding:10px 14px 6px}
 header h1{font-size:19px;margin:0;font-weight:800;letter-spacing:-.3px}
 header h1 span{color:var(--acc)}
-.seg{display:flex;background:var(--key2);border-radius:10px;padding:3px;margin-left:auto}
-.seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-size:14px;font-weight:600;color:var(--muted)}
-.seg button.on{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+/* Rate mode: a dropdown (two taps to change, so it is not switched by accident) */
+.modewrap{position:relative;margin-left:auto}
+.modebtn{border:0;background:var(--key2);border-radius:10px;padding:7px 11px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.modebtn .md{width:8px;height:8px;border-radius:50%;background:var(--acc);flex:none}
+.modebtn .dd{font-size:10px;color:var(--muted)}
+#modeMenu{position:absolute;top:calc(100% + 6px);right:0;z-index:15;width:230px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.28);padding:5px}
+#modeMenu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;text-align:left;padding:9px 10px;border-radius:8px}
+#modeMenu button.on{background:var(--key2)}
+#modeMenu b{display:block;font-size:15px}#modeMenu small{display:block;color:var(--muted);font-size:12px}
+#modeMenu .md{width:10px;height:10px;border-radius:50%;flex:none}#modeMenu .md.g{background:#10b981}#modeMenu .md.v{background:#8b5cf6}
+#modeMenu .tick{margin-left:auto;color:var(--text);font-weight:800;visibility:hidden}#modeMenu .on .tick{visibility:visible}
 header .hb{white-space:nowrap;border:0;background:var(--acc-soft);color:var(--acc);font-weight:700;font-size:14px;padding:7px 12px;border-radius:9px}
 .statusline{display:flex;align-items:center;gap:8px;padding:2px 14px 8px;font-size:12.5px;color:var(--muted)}
 .statusline .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
 .statusline .dot.on{background:var(--up)}
 .statusline button{margin-left:auto;border:0;background:transparent;color:var(--acc);font-weight:700;font-size:13px;padding:4px 2px}
 .spin{opacity:.5}
-.statusline .arrange{margin-left:auto}
+.statusline .sr{margin-left:auto;display:flex;gap:14px;flex:none}
+.statusline .sr button{margin-left:0}
+.statusline .cmpbtn{color:var(--star)}
+#stamp,#cstamp{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ☆ on the highlighted row saves the price for comparing */
+.row .star{flex:none;width:34px;height:34px;border:0;border-radius:9px;background:var(--star-soft);color:var(--star);font-size:18px;line-height:1;padding:0;margin-left:2px}
 main{flex:1;overflow-y:auto;padding:0 12px 12px;-webkit-overflow-scrolling:touch}
 .row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid transparent;border-radius:14px;padding:11px 12px;margin-bottom:7px;box-shadow:var(--shadow)}
 .row.active{border-color:var(--acc);background:var(--acc-soft)}
@@ -105,9 +118,9 @@ summary{color:var(--acc);font-weight:700;padding:2px 0 10px}
 .pi small{color:var(--muted);display:block;font-size:12.5px}
 .pi .tick{margin-left:auto;color:var(--acc);font-weight:800}
 /* Edit (reorder) mode: keypad slides away, amounts and other controls fade; only ▲/✕ and Done stay live */
-.seg,.hb,.statusline>*,.row,.val,.cc,.addrow{transition:opacity .2s ease,background-color .2s ease,border-color .2s ease}
+.modebtn,.hb,.statusline>*,.cmpbtn,.row,.val,.cc,.addrow{transition:opacity .2s ease,background-color .2s ease,border-color .2s ease}
 #pad{transition:padding .25s ease,opacity .25s ease}
-body.editing .seg,body.editing header .hb,body.editing .statusline>:not(.arrange){opacity:.35;pointer-events:none}
+body.editing .modebtn,body.editing header .hb,body.editing .statusline>:not(.sr),body.editing .statusline .cmpbtn{opacity:.35;pointer-events:none}
 body.editing #pad{opacity:.35;pointer-events:none;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
 body.editing #keys{max-height:0;padding-bottom:0}
 body.editing #list .row .val{opacity:.3}
@@ -116,6 +129,25 @@ body.editing #list .row.active .big{color:inherit}
 body.editing #list .row.dim{opacity:1}
 body.editing #list .row.dim .cc,body.editing #list .row.dim .flag{opacity:.45}
 body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
+/* Save price + Compare sheets */
+.preview{background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.preview .p1{font-size:24px;font-weight:700;color:var(--acc)}.preview .p2{color:var(--muted);font-size:13.5px;margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 12px}.chips:empty{display:none}
+.chip{border:0;background:var(--key2);border-radius:14px;padding:5px 11px;font-size:13px;flex:none}
+.chip.on{background:var(--acc-soft);color:var(--acc);font-weight:700}
+.sheet-card h3{display:flex;align-items:center}
+#cmpClear{margin-left:auto;padding:0;color:var(--down);font-size:13px}
+.vin{display:flex;align-items:center;gap:6px;overflow-x:auto;font-size:13px;color:var(--muted);margin-bottom:12px;padding-bottom:2px;flex:none}
+#cmpList{flex:1;overflow-y:auto}
+.grp{background:var(--bg);border-radius:12px;padding:10px 12px 4px;margin-bottom:9px}
+.grp .gh{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.grp .gh b{font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grp .gh small{margin-left:auto;color:var(--muted);font-size:12px;flex:none}
+.gr{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.gr .shop{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gr .shop small{display:block;color:var(--muted);font-size:11.5px}
+.gr .pr{text-align:right;flex:none}.gr .pr b{display:block;font-size:15px;font-variant-numeric:tabular-nums}.gr .pr small{display:block;color:var(--muted);font-size:11.5px}
+.badge{font-size:11px;font-weight:800;padding:3px 7px;border-radius:6px;background:var(--acc-soft);color:var(--acc);flex:none}
+.more{font-size:12px;font-weight:700;color:var(--down);flex:none}
+.gr .del{flex:none;width:26px;height:26px;border:0;border-radius:7px;background:var(--key2);color:var(--down);font-size:13px;padding:0}
 #toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20;max-width:90vw;text-align:center}
 #toast.show{opacity:1}
 </style>
@@ -123,11 +155,17 @@ body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
 <body>
 <header>
   <h1>Steve<span>Fx</span></h1>
-  <div class="seg"><button data-mode="latest">Latest</button><button data-mode="custom">Custom</button></div>
+  <div class="modewrap">
+    <button id="modeBtn" class="modebtn" aria-haspopup="true"><span class="md"></span><span id="modeName">Market</span><span class="dd">▾</span></button>
+    <div id="modeMenu" class="hidden">
+      <button data-mode="latest"><span class="md g"></span><span><b>Market</b><small>Live exchange rates</small></span><span class="tick">✓</span></button>
+      <button data-mode="custom"><span class="md v"></span><span><b>Mine</b><small>Your own rates</small></span><span class="tick">✓</span></button>
+    </div>
+  </div>
   <button id="refresh" class="hb">↻ Refresh</button><button id="manage" class="hb hidden">Rates</button>
 </header>
-<div id="status" class="statusline"><span class="dot" id="dot"></span><span id="stamp">No rates yet</span><button class="arrange">⇅ Order</button></div>
-<div id="cstatus" class="statusline hidden"><span id="cstamp"></span><button class="arrange">⇅ Order</button></div>
+<div id="status" class="statusline"><span class="dot" id="dot"></span><span id="stamp">No rates yet</span><span class="sr"><button class="cmpbtn hidden">★ Compare</button><button class="arrange">⇅ Order</button></span></div>
+<div id="cstatus" class="statusline hidden"><span id="cstamp"></span><span class="sr"><button class="cmpbtn hidden">★ Compare</button><button class="arrange">⇅ Order</button></span></div>
 <main id="list"></main>
 <div id="pad">
   <button id="padHandle" aria-label="Show or hide keypad"></button>
@@ -179,6 +217,25 @@ body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
     <div class="actions"><button id="rClose" class="primary">Done</button></div>
   </div>
 </div>
+<div id="saveSheet" class="sheet hidden">
+  <div class="sheet-card">
+    <h3>Save price</h3>
+    <div class="preview"><div class="p1" id="svPrice"></div><div class="p2" id="svIn"></div></div>
+    <label>Item<input id="svItem" placeholder="e.g. Kopi Luwak 100g" autocomplete="off"></label>
+    <div class="chips" id="svItems"></div>
+    <label>Shop<input id="svShop" placeholder="e.g. Pasar Badung" autocomplete="off"></label>
+    <div class="chips" id="svShops"></div>
+    <div class="actions"><button id="svCancel">Cancel</button><button id="svSave" class="primary">Save</button></div>
+  </div>
+</div>
+<div id="cmpSheet" class="sheet hidden">
+  <div class="sheet-card tall">
+    <h3>Compare prices<button class="link" id="cmpClear">Clear all</button></h3>
+    <div class="vin" id="cmpIn"></div>
+    <div id="cmpList"></div>
+    <div class="actions"><button id="cmpClose" class="primary">Done</button></div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -203,11 +260,14 @@ const S = {
   cActive: LS.get('cactive', null),      // highlighted currency in Custom mode
   cExpr: LS.get('cexpr', '100'),
   padHidden: LS.get('padhidden', false), // keypad slid down
+  saved: LS.get('saved', []),            // starred prices: [{id,item,shop,amount,cur,t}]
+  cmpCur: LS.get('cmpcur', null),        // currency the Compare list is shown in
   editing: false, loading: false, fresh: true, editId: null, pickFor: null
 };
 function save() {
   LS.set('mode', S.mode); LS.set('favs', S.favs); LS.set('active', S.active); LS.set('expr', S.expr); LS.set('custom', S.custom);
   LS.set('corder', S.corder); LS.set('cactive', S.cActive); LS.set('cexpr', S.cExpr); LS.set('padhidden', S.padHidden);
+  LS.set('saved', S.saved); LS.set('cmpcur', S.cmpCur);
 }
 
 /* ---------- helpers ---------- */
@@ -344,13 +404,13 @@ function renderStatus() {
   const b = $('#refresh'); b.classList.toggle('spin', S.loading); b.textContent = S.loading ? 'Updating…' : '↻ Refresh';
   if (!S.rates) { $('#stamp').textContent = navigator.onLine ? 'No rates yet' : 'Offline · no rates saved yet'; return; }
   const t = new Date(S.rates.time).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-  $('#stamp').textContent = 'Rates ' + t + ' · checked ' + ago(S.rates.fetched) + (navigator.onLine ? '' : ' · offline');
+  $('#stamp').textContent = 'Rates ' + t + ' · ' + ago(S.rates.fetched) + (navigator.onLine ? '' : ' · offline');
 }
 
 function renderLatest() {
   const amt = evalExpr(S.expr);
   let h = '';
-  if (!S.rates) h += '<div class="empty"><b>No market rates saved yet.</b><br>Connect to the internet once and tap Refresh. After that, conversions work offline using the last saved rates. Custom mode works without any download.</div>';
+  if (!S.rates) h += '<div class="empty"><b>No market rates saved yet.</b><br>Connect to the internet once and tap Refresh. After that, conversions work offline using the last saved rates. Mine mode works without any download.</div>';
   h += S.favs.map((c, i) => {
     const act = c === S.active;
     let big, sub;
@@ -363,7 +423,7 @@ function renderLatest() {
       sub = isFinite(r) ? '1 ' + S.active + ' = ' + fmtRate(r) + ' ' + c : '';
     }
     const ctl = S.editing ? `<div class="ctl"><button data-act="up" data-i="${i}" ${i ? '' : 'disabled style="opacity:.3"'}>▲</button><button class="rm" data-act="rm" data-i="${i}">✕</button></div>` : '';
-    return rowHtml({ attrs: `data-code="${c}"`, active: act, flag: c, title: c, sub: nameOf(c), big, smalls: [sub], pre: ctl });
+    return rowHtml({ attrs: `data-code="${c}"`, active: act, flag: c, title: c, sub: nameOf(c), big, smalls: [sub], pre: ctl, post: act && !S.editing ? '<button class="star" data-act="star" aria-label="Save this price to compare">☆</button>' : '' });
   }).join('');
   h += '<button class="addrow" data-act="add">+ Add currency</button>';
   $('#list').innerHTML = h;
@@ -387,7 +447,7 @@ function renderCustom() {
       smalls = ['1 ' + a + ' = ' + fmtRate(d.r) + ' ' + c];
     } else { big = '—'; smalls = ['No rate with ' + a]; }
     const ctl = S.editing ? `<div class="ctl"><button data-act="up" data-i="${i}" ${i ? '' : 'disabled style="opacity:.3"'}>▲</button></div>` : '';
-    return rowHtml({ attrs: `data-code="${c}"`, active: act, cls: !act && !d ? 'dim' : '', flag: c, title: c, sub: nameOf(c), big, smalls, pre: ctl });
+    return rowHtml({ attrs: `data-code="${c}"`, active: act, cls: !act && !d ? 'dim' : '', flag: c, title: c, sub: nameOf(c), big, smalls, pre: ctl, post: act && !S.editing ? '<button class="star" data-act="star" aria-label="Save this price to compare">☆</button>' : '' });
   }).join('') + '<button class="addrow" data-act="addrate">+ Add custom rate</button>';
 }
 
@@ -396,7 +456,9 @@ function render() {
   if (custom) syncCustom();
   document.body.classList.toggle('custom', custom);
   document.body.classList.toggle('editing', S.editing);
-  document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
+  $('#modeName').textContent = custom ? 'Mine' : 'Market';
+  document.querySelectorAll('#modeMenu [data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
+  document.querySelectorAll('.cmpbtn').forEach(b => { b.textContent = '★ Compare ' + S.saved.length; b.classList.toggle('hidden', !S.saved.length); });
   document.querySelectorAll('.arrange').forEach(b => { b.textContent = S.editing ? 'Done' : '⇅ Order'; b.classList.toggle('hidden', custom && !S.custom.length); });
   $('#refresh').classList.toggle('hidden', custom);
   $('#status').classList.toggle('hidden', custom);
@@ -462,7 +524,7 @@ window.addEventListener('pointercancel', keyUp);
 $('#keys').addEventListener('contextmenu', ev => ev.preventDefault());
 document.addEventListener('keydown', ev => {
   if (ev.target.matches('input,select') || S.editing) return;
-  if (!$('#sheet').classList.contains('hidden') || !$('#picker').classList.contains('hidden') || !$('#rates').classList.contains('hidden')) return;
+  if (document.querySelector('.sheet:not(.hidden)')) return;
   const map = { '*': '×', '/': '÷', '-': '−', '+': '+', 'Enter': '=', '=': '=', 'Backspace': '⌫', 'Escape': 'C', '.': '.', ',': '.', '%': '%' };
   const k = /^\d$/.test(ev.key) ? ev.key : map[ev.key];
   if (k) { ev.preventDefault(); press(k); }
@@ -516,6 +578,7 @@ $('#list').addEventListener('click', ev => {
   if (S.mode === 'latest') {
     if (b) {
       const i = +b.dataset.i, a = b.dataset.act;
+      if (a === 'star') return openSave();
       if (a === 'add') return openPicker(null);
       if (a === 'rm') {
         if (S.favs.length <= 2) return toast('Keep at least 2 currencies');
@@ -531,6 +594,7 @@ $('#list').addEventListener('click', ev => {
   // custom mode
   if (b) {
     const i = +b.dataset.i, a = b.dataset.act;
+    if (a === 'star') return openSave();
     if (a === 'addrate') return S.editing ? undefined : openSheet(null);
     if (a === 'up' && i > 0) { [S.corder[i - 1], S.corder[i]] = [S.corder[i], S.corder[i - 1]]; save(); render(); }
     return;
@@ -679,8 +743,120 @@ document.querySelectorAll('.sheet').forEach(s => s.addEventListener('click', ev 
   if (s.id === 'picker') closePicker(); else if (s.id === 'sheet') closeSheet(); else s.classList.add('hidden');
 }));
 
+/* ---------- saved prices: ☆ a price, then compare the same item across shops ---------- */
+const SYM = { USD: 'US$', SGD: 'S$', AUD: 'A$', NZD: 'NZ$', HKD: 'HK$', CAD: 'C$', TWD: 'NT$', EUR: '€', GBP: '£', JPY: '¥', CNY: 'CN¥', KRW: '₩', INR: '₹', IDR: 'Rp ', MYR: 'RM ', THB: '฿', PHP: '₱', VND: '₫', CHF: 'CHF ' };
+function money(v, c) { return SYM[c] ? SYM[c] + fmt(v, c) : fmt(v, c) + ' ' + c; }
+// Convert with the rates of the mode you're in: market rates, or (in Mine) your own rate for that pair.
+function modeConvert(v, from, to) {
+  if (from === to) return v;
+  if (S.mode === 'custom') { const d = directRate(from, to); return d ? v * d.r : NaN; }
+  return convert(v, from, to);
+}
+function whenText(t) {
+  const d = new Date(t), day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const n = Math.round((day(new Date()) - day(d)) / 864e5);
+  if (n === 0) return 'Today ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  if (n === 1) return 'Yesterday';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+const uniqNames = arr => { const seen = new Set(); return arr.filter(x => { const k = (x || '').toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; }); };
+
+// Save sheet: the price is saved in the currency of the highlighted row.
+let pendingSave = null;
+function openSave() {
+  const custom = S.mode === 'custom', c = custom ? S.cActive : S.active, v = evalExpr(custom ? S.cExpr : S.expr);
+  if (!(v > 0)) return toast('Type a price first');
+  pendingSave = { amount: +v.toFixed(8), cur: c };
+  $('#svPrice').textContent = money(v, c);
+  $('#svIn').textContent = 'Saved in ' + c;
+  $('#svItem').value = ''; $('#svShop').value = '';
+  renderSaveChips();
+  $('#saveSheet').classList.remove('hidden');
+}
+function renderSaveChips() {
+  const chips = (field, names) => names.slice(0, 8).map(n =>
+    `<button class="chip${$(field).value.trim().toLowerCase() === n.toLowerCase() ? ' on' : ''}" data-v="${esc(n)}">${esc(n)}</button>`).join('');
+  $('#svItems').innerHTML = chips('#svItem', uniqNames(S.saved.map(x => x.item)));
+  $('#svShops').innerHTML = chips('#svShop', uniqNames(S.saved.map(x => x.shop)));
+}
+[['#svItems', '#svItem'], ['#svShops', '#svShop']].forEach(([box, field]) => {
+  $(box).addEventListener('click', ev => { const b = ev.target.closest('.chip'); if (b) { $(field).value = b.dataset.v; renderSaveChips(); } });
+  $(field).addEventListener('input', renderSaveChips);
+});
+$('#svCancel').addEventListener('click', () => $('#saveSheet').classList.add('hidden'));
+$('#svSave').addEventListener('click', () => {
+  if (!pendingSave) return;
+  const it = { id: String(Date.now()), item: $('#svItem').value.trim(), shop: $('#svShop').value.trim(), amount: pendingSave.amount, cur: pendingSave.cur, t: Date.now() };
+  S.saved.unshift(it); pendingSave = null;
+  save(); $('#saveSheet').classList.add('hidden'); render();
+  toast('★ Saved ' + money(it.amount, it.cur) + (it.item ? ' · ' + it.item : ''));
+});
+
+// Compare sheet: same item grouped, cheapest first, all shown in the currency you pick.
+function cmpCurrencies() { return S.mode === 'custom' ? S.corder.slice() : S.favs.slice(); }
+function openCompare() {
+  const list = cmpCurrencies();
+  if (!list.includes(S.cmpCur)) S.cmpCur = S.saved[0] && list.includes(S.saved[0].cur) ? S.saved[0].cur : list[0];
+  save(); renderCompare();
+  $('#cmpSheet').classList.remove('hidden');
+}
+function renderCompare() {
+  const cur = S.cmpCur;
+  $('#cmpIn').innerHTML = 'View in ' + cmpCurrencies().map(c => `<button class="chip${c === cur ? ' on' : ''}" data-c="${c}">${c}</button>`).join('');
+  if (!S.saved.length) { $('#cmpList').innerHTML = '<div class="empty">No saved prices.<br>Type a price, then tap ☆ on the highlighted row to save it here.</div>'; return; }
+  const groups = new Map();   // by item name, ignoring capitals; most recently saved item first
+  S.saved.forEach(x => { const k = x.item.toLowerCase(); if (!groups.has(k)) groups.set(k, { items: [] }); groups.get(k).items.push(x); });
+  groups.forEach(g => { g.name = g.items[g.items.length - 1].item || 'No name'; });   // spelling you first typed
+  const pct = p => p < 1 ? p.toFixed(1) : String(Math.round(p));
+  $('#cmpList').innerHTML = [...groups.values()].map(g => {
+    const rows = g.items.map(x => ({ x, v: modeConvert(x.amount, x.cur, cur) }));
+    const ok = rows.filter(r => isFinite(r.v)).sort((a, b) => a.v - b.v), none = rows.filter(r => !isFinite(r.v));
+    const min = ok.length ? ok[0].v : NaN, n = rows.length;
+    return `<div class="grp"><div class="gh"><b>${esc(g.name)}</b><small>${n} price${n === 1 ? '' : 's'}</small></div>` + ok.concat(none).map(r => {
+      const x = r.x, same = x.cur === cur, conv = isFinite(r.v);
+      let tag = '';
+      if (conv && ok.length > 1) tag = r.v - min < 1e-9 * Math.max(1, min) ? '<span class="badge">Cheapest</span>' : `<span class="more">+${pct((r.v - min) / min * 100)}%</span>`;
+      const main = conv ? (same ? '' : '≈ ') + money(r.v, cur) : '—';
+      const sub = same ? '' : conv ? 'saved ' + money(x.amount, x.cur) : money(x.amount, x.cur) + ' · no ' + (S.mode === 'custom' ? 'Mine' : 'market') + ' rate to ' + cur;
+      return `<div class="gr" data-id="${x.id}"><div class="shop">${esc(x.shop || 'No shop')}<small>${whenText(x.t)}</small></div>${tag}<div class="pr"><b>${main}</b>${sub ? '<small>' + sub + '</small>' : ''}</div><button class="del" data-act="del" aria-label="Delete">✕</button></div>`;
+    }).join('') + '</div>';
+  }).join('');
+}
+// Tap a saved price: put it back on the keypad (in its own currency).
+function loadPrice(x) {
+  if (S.mode === 'custom') {
+    if (!S.corder.includes(x.cur)) return toast('None of your Mine rates use ' + x.cur);
+    S.cActive = x.cur; S.cExpr = plain(x.amount, x.cur);
+  } else {
+    if (!S.favs.includes(x.cur)) S.favs.push(x.cur);
+    S.active = x.cur; S.expr = plain(x.amount, x.cur);
+  }
+  S.fresh = true; save();
+  $('#cmpSheet').classList.add('hidden'); showPad(); render();
+}
+$('#cmpIn').addEventListener('click', ev => { const b = ev.target.closest('[data-c]'); if (b) { S.cmpCur = b.dataset.c; save(); renderCompare(); } });
+$('#cmpList').addEventListener('click', ev => {
+  const row = ev.target.closest('.gr'); if (!row) return;
+  const x = S.saved.find(y => y.id === row.dataset.id); if (!x) return;
+  if (ev.target.closest('[data-act="del"]')) { S.saved = S.saved.filter(y => y !== x); save(); renderCompare(); render(); return; }
+  loadPrice(x);
+});
+$('#cmpClear').addEventListener('click', () => {
+  if (!S.saved.length || !confirm('Delete all saved prices?')) return;
+  S.saved = []; save(); renderCompare(); render();
+});
+$('#cmpClose').addEventListener('click', () => $('#cmpSheet').classList.add('hidden'));
+document.querySelectorAll('.cmpbtn').forEach(b => b.addEventListener('click', openCompare));
+
 /* ---------- header ---------- */
-document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.mode; S.editing = false; S.fresh = true; save(); render(); }));
+$('#modeBtn').addEventListener('click', () => $('#modeMenu').classList.toggle('hidden'));
+$('#modeMenu').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-mode]'); if (!b) return;
+  $('#modeMenu').classList.add('hidden');
+  if (b.dataset.mode === S.mode) return;
+  S.mode = b.dataset.mode; S.editing = false; S.fresh = true; save(); render();
+});
+document.addEventListener('click', ev => { if (!ev.target.closest('.modewrap')) $('#modeMenu').classList.add('hidden'); });
 document.querySelectorAll('.arrange').forEach(b => b.addEventListener('click', () => { S.editing = !S.editing; render(); }));
 $('#refresh').addEventListener('click', () => fetchRates(true));
 window.addEventListener('online', () => { renderStatus(); fetchRates(false); });
