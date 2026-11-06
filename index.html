@@ -152,7 +152,9 @@ body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
 #cmpCard.itemview{border:2.5px solid var(--neu-line);border-bottom:0}
 .band{margin:-16px -16px 14px;padding:14px 16px;background:var(--neu);border-radius:15px 15px 0 0;display:flex;align-items:center;gap:10px;flex:none}
 .band .bb{width:34px;height:34px;border:0;border-radius:9px;background:rgba(127,127,127,.18);font-size:20px;line-height:1;padding:0;flex:none}
+.band .ilbl{color:var(--muted);font-size:15px;font-weight:600;flex:none;margin-right:-4px}
 .band b{font-size:19px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.colhead{font-size:12px;font-weight:700;color:var(--muted);padding:9px 0 5px}
 .rowsonly{background:var(--bg);border-radius:12px;padding:2px 12px}
 .rowsonly .gr:first-child{border-top:0}
 #cmpDelItem{display:block;margin:12px auto 0;padding:4px;color:var(--down);font-size:13px}
@@ -254,7 +256,7 @@ body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
       <div id="cmpProds"></div>
     </div>
     <div id="cmpItemView" class="hidden">
-      <div class="band"><button class="bb" id="cmpBack" aria-label="Back to saved items">‹</button><b id="cmpName"></b></div>
+      <div class="band"><button class="bb" id="cmpBack" aria-label="Back to saved items">‹</button><span class="ilbl">Item:</span><b id="cmpName"></b></div>
       <div class="vin" id="cmpIn"></div>
       <div id="cmpList"></div>
       <button class="link" id="cmpDelItem">Delete this item</button>
@@ -877,7 +879,7 @@ function renderItem(g) {
   const rows = g.items.map(x => ({ x, v: modeConvert(x.amount, x.cur, cur) }));
   const ok = rows.filter(r => isFinite(r.v)).sort((a, b) => a.v - b.v), none = rows.filter(r => !isFinite(r.v));
   const min = ok.length ? ok[0].v : NaN, pct = p => p < 1 ? p.toFixed(1) : String(Math.round(p));
-  $('#cmpList').innerHTML = '<div class="rowsonly">' + ok.concat(none).map(r => {
+  $('#cmpList').innerHTML = '<div class="rowsonly"><div class="colhead">Shop</div>' + ok.concat(none).map(r => {
     const x = r.x, same = x.cur === cur, conv = isFinite(r.v);
     let tag = '';
     if (conv && ok.length > 1) tag = r.v - min < 1e-9 * Math.max(1, min) ? '<span class="badge">Cheapest</span>' : `<span class="more">+${pct((r.v - min) / min * 100)}%</span>`;
