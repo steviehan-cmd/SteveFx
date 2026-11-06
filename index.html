@@ -78,7 +78,7 @@ main{flex:1;overflow-y:auto;padding:0 12px 12px;-webkit-overflow-scrolling:touch
 #keys button.press{filter:brightness(.82);transform:scale(.94)}
 @media (prefers-color-scheme:dark){#keys button.press{filter:brightness(1.6)}}
 #keys .op{background:var(--tkey2);color:var(--acc);font-weight:600}
-#keys .eq{grid-row:span 2;background:var(--acc);color:var(--on-acc);font-weight:700}
+#keys .eq{background:var(--acc);color:var(--on-acc);font-weight:700}
 /* sheets */
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:10}
 .sheet.hidden{display:none}
@@ -132,11 +132,11 @@ body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
 <div id="pad">
   <button id="padHandle" aria-label="Show or hide keypad"></button>
   <div id="keys">
-    <button class="op" data-k="C">C</button><button class="op" data-k="⌫">⌫</button><button class="op" data-k="÷">÷</button><button class="op" data-k="×">×</button>
-    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="−">−</button>
-    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="+">+</button>
-    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="eq" data-k="=">=</button>
-    <button data-k="00">00</button><button data-k="0">0</button><button data-k=".">.</button>
+    <button class="op" data-k="C">C</button><button class="op" data-k="⌫">⌫</button><button class="op" data-k="%">%</button><button class="op" data-k="÷">÷</button>
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="×">×</button>
+    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="−">−</button>
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="op" data-k="+">+</button>
+    <button data-k="000">000</button><button data-k="0">0</button><button data-k=".">.</button><button class="eq" data-k="=">=</button>
   </div>
 </div>
 
@@ -234,13 +234,30 @@ function fmtRate(v) {
   if (!isFinite(v)) return '—';
   return v.toLocaleString('en-US', { maximumFractionDigits: v >= 100 ? 2 : v >= 1 ? 4 : 8 });
 }
+// Works out a typed sum. × and ÷ go before + and −. % works like a phone calculator:
+// 200 + 15% = 230, 200 − 10% = 180, 200 × 15% = 30, 15% on its own = 0.15.
 function evalExpr(s) {
-  let t = String(s).replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/,/g, '');
-  if (!/^[0-9.+\-*/ ]*$/.test(t)) return NaN;
-  t = t.replace(/[+\-*/.]+$/, '');
+  const t = String(s).replace(/,/g, '').replace(/[+−×÷.]+$/, '');
   if (!t) return 0;
-  try { const v = Function('"use strict";return (' + t + ')')(); return isFinite(v) ? v : NaN; } catch (e) { return NaN; }
+  const parts = t.split(/([+−×÷])/);   // number, operator, number, ...
+  const num = p => { const m = /^(-?(?:\d+\.?\d*|\.\d+))(%?)$/.exec(p); return m ? { v: +m[1], pct: !!m[2] } : null; };
+  let sum = 0, sign = 1, term = null;
+  for (let i = 0; i < parts.length; i += 2) {
+    const n = num(parts[i]); if (!n) return NaN;
+    const op = i ? parts[i - 1] : null, val = n.pct ? n.v / 100 : n.v;
+    if (op === '×') term *= val;
+    else if (op === '÷') term /= val;
+    else {
+      if (term !== null) sum += sign * term;
+      sign = op === '−' ? -1 : 1;
+      const pctOfSoFar = op && n.pct && parts[i + 1] !== '×' && parts[i + 1] !== '÷';
+      term = pctOfSoFar ? sum * n.v / 100 : val;   // "+ 15%" means 15% of the total so far
+    }
+  }
+  sum += sign * term;
+  return isFinite(sum) ? sum : NaN;
 }
+const CALC = /[+−×÷%]/;   // the amount is a sum, so show "= result" under it
 function fmtExpr(e) {
   return String(e).replace(/\d+(\.\d*)?/g, m => {
     const [i, d] = m.split('.');
@@ -339,7 +356,7 @@ function renderLatest() {
     let big, sub;
     if (act) {
       big = fmtExpr(S.expr);
-      sub = OPS.test(S.expr) ? '= ' + fmt(amt, c) : '';
+      sub = CALC.test(S.expr) ? '= ' + fmt(amt, c) : '';
     } else {
       big = fmt(convert(amt, S.active, c), c);
       const r = convert(1, S.active, c);
@@ -364,7 +381,7 @@ function renderCustom() {
   $('#list').innerHTML = codes.map(c => {
     const i = S.corder.indexOf(c), act = c === a, d = act ? null : directRate(a, c);
     let big, smalls;
-    if (act) { big = fmtExpr(S.cExpr); smalls = [OPS.test(S.cExpr) ? '= ' + fmt(v, c) : '']; }
+    if (act) { big = fmtExpr(S.cExpr); smalls = [CALC.test(S.cExpr) ? '= ' + fmt(v, c) : '']; }
     else if (d) {
       big = fmt(v * d.r, c);
       smalls = ['1 ' + a + ' = ' + fmtRate(d.r) + ' ' + c];
@@ -402,18 +419,20 @@ function press(k) {
   const custom = S.mode === 'custom';
   if (!k || S.editing || (custom && !S.cActive)) return;
   let e = custom ? S.cExpr : S.expr;
-  const digit = /^(\d|00)$/.test(k) || k === '.';
+  const digit = /^(\d|000)$/.test(k) || k === '.';
   if (S.fresh && digit) e = '0';
   S.fresh = false;
+  if (digit && e.endsWith('%')) e += '×';   // "15%" then 4 → "15% × 4"
   if (k === 'C') e = '0';
+  else if (k === '%') { if (/[+−×÷%]$/.test(e)) return; e = e.replace(/\.$/, '') + '%'; }
   else if (k === '⌫') e = e.length > 1 ? e.slice(0, -1) : '0';
   else if (k === '=') { const v = evalExpr(e); e = isFinite(v) ? String(+v.toFixed(8)) : '0'; S.fresh = true; }
   else if (OPS.test(k)) { e = /[+−×÷.]$/.test(e) ? e.slice(0, -1) + k : e + k; }
   else if (k === '.') { const seg = e.split(OPS).pop(); if (!seg.includes('.')) e += seg === '' ? '0.' : '.'; }
   else {
     const seg = e.split(OPS).pop();
-    if (seg === '0') e = e.slice(0, -1) + (k === '00' ? '0' : k);
-    else if (seg === '' && k === '00') e += '0';
+    if (seg === '0') e = e.slice(0, -1) + (k === '000' ? '0' : k);
+    else if (seg === '' && k === '000') e += '0';
     else e += k;
   }
   if (e.length > 40) return;
@@ -444,7 +463,7 @@ $('#keys').addEventListener('contextmenu', ev => ev.preventDefault());
 document.addEventListener('keydown', ev => {
   if (ev.target.matches('input,select') || S.editing) return;
   if (!$('#sheet').classList.contains('hidden') || !$('#picker').classList.contains('hidden') || !$('#rates').classList.contains('hidden')) return;
-  const map = { '*': '×', '/': '÷', '-': '−', '+': '+', 'Enter': '=', '=': '=', 'Backspace': '⌫', 'Escape': 'C', '.': '.', ',': '.' };
+  const map = { '*': '×', '/': '÷', '-': '−', '+': '+', 'Enter': '=', '=': '=', 'Backspace': '⌫', 'Escape': 'C', '.': '.', ',': '.', '%': '%' };
   const k = /^\d$/.test(ev.key) ? ev.key : map[ev.key];
   if (k) { ev.preventDefault(); press(k); }
 });
