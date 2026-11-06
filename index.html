@@ -13,8 +13,8 @@
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <title>SteveFx</title>
 <style>
-:root{--bg:#f3f5f7;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e3e7ec;--acc:#0b8f63;--acc-soft:#e2f5ed;--key:#fff;--key2:#e6ebf0;--up:#059669;--down:#dc2626;--shadow:0 1px 2px rgba(0,0,0,.06);--on-acc:#fff;--tray:#fff;--tkey:#eef1f4;--tkey2:#e2e7ec;--handle:#d5dbe1;--tshadow:0 -4px 16px rgba(0,0,0,.08);--star:#b45309;--star-soft:#fef3c7}
-@media (prefers-color-scheme:dark){:root{--bg:#0b1117;--card:#141c25;--text:#e8edf2;--muted:#8794a1;--line:#222c37;--acc:#34d399;--acc-soft:#10291f;--key:#18212b;--key2:#222e3b;--up:#34d399;--down:#f87171;--shadow:none;--on-acc:#062016;--tray:#18222d;--tkey:#223040;--tkey2:#1a2734;--handle:#3a4756;--tshadow:0 -6px 20px rgba(0,0,0,.45);--star:#fbbf24;--star-soft:#33290f}}
+:root{--bg:#f3f5f7;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e3e7ec;--acc:#0b8f63;--acc-soft:#e2f5ed;--key:#fff;--key2:#e6ebf0;--up:#059669;--down:#dc2626;--shadow:0 1px 2px rgba(0,0,0,.06);--on-acc:#fff;--tray:#fff;--tkey:#eef1f4;--tkey2:#e2e7ec;--handle:#d5dbe1;--tshadow:0 -4px 16px rgba(0,0,0,.08);--star:#b45309;--star-soft:#fef3c7;--neu:#e5e9ef;--neu-line:#94a3b8}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1117;--card:#141c25;--text:#e8edf2;--muted:#8794a1;--line:#222c37;--acc:#34d399;--acc-soft:#10291f;--key:#18212b;--key2:#222e3b;--up:#34d399;--down:#f87171;--shadow:none;--on-acc:#062016;--tray:#18222d;--tkey:#223040;--tkey2:#1a2734;--handle:#3a4756;--tshadow:0 -6px 20px rgba(0,0,0,.45);--star:#fbbf24;--star-soft:#33290f;--neu:#2a3542;--neu-line:#64748b}}
 /* Custom mode uses violet instead of green */
 body.custom{--acc:#7c3aed;--acc-soft:#f1eafe;--on-acc:#fff}
 @media (prefers-color-scheme:dark){body.custom{--acc:#a78bfa;--acc-soft:#221a3d;--on-acc:#1b1236}}
@@ -138,7 +138,24 @@ body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
 .sheet-card h3{display:flex;align-items:center}
 #cmpClear{margin-left:auto;padding:0;color:var(--down);font-size:13px}
 .vin{display:flex;align-items:center;gap:6px;overflow-x:auto;font-size:13px;color:var(--muted);margin-bottom:12px;padding-bottom:2px;flex:none}
-#cmpList{flex:1;overflow-y:auto}
+#cmpListView,#cmpItemView{flex:1;display:flex;flex-direction:column;min-height:0}
+#cmpProds{flex:1;overflow-y:auto}
+#cmpList{flex:0 1 auto;overflow-y:auto}
+#cmpSearch{margin:0 0 10px;flex:none}
+.sortrow{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:10px;flex:none}
+.sortrow .cmplab{margin-left:auto;font-size:12.5px;padding-right:2px}
+.prod{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:12px;padding:10px 12px;margin-bottom:6px}
+.prod .nm{flex:1;min-width:0}.prod .nm b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.prod .nm small{color:var(--muted);font-size:12px}
+.prod .fr{text-align:right;flex:none}.prod .fr small{display:block;color:var(--muted);font-size:11.5px}.prod .fr b{font-size:15px;font-variant-numeric:tabular-nums}
+.prod .chev{color:var(--muted);font-size:20px;flex:none}
+/* one product's page: grey band with the name, grey outline round the page */
+#cmpCard.itemview{border:2.5px solid var(--neu-line);border-bottom:0}
+.band{margin:-16px -16px 14px;padding:14px 16px;background:var(--neu);border-radius:15px 15px 0 0;display:flex;align-items:center;gap:10px;flex:none}
+.band .bb{width:34px;height:34px;border:0;border-radius:9px;background:rgba(127,127,127,.18);font-size:20px;line-height:1;padding:0;flex:none}
+.band b{font-size:19px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rowsonly{background:var(--bg);border-radius:12px;padding:2px 12px}
+.rowsonly .gr:first-child{border-top:0}
+#cmpDelItem{display:block;margin:12px auto 0;padding:4px;color:var(--down);font-size:13px}
 .grp{background:var(--bg);border-radius:12px;padding:10px 12px 4px;margin-bottom:9px}
 .grp .gh{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.grp .gh b{font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .grp .gh small{margin-left:auto;color:var(--muted);font-size:12px;flex:none}
@@ -229,10 +246,19 @@ body.custom.editing #list .addrow{opacity:.35;pointer-events:none}
   </div>
 </div>
 <div id="cmpSheet" class="sheet hidden">
-  <div class="sheet-card tall">
-    <h3>Compare prices<button class="link" id="cmpClear">Clear all</button></h3>
-    <div class="vin" id="cmpIn"></div>
-    <div id="cmpList"></div>
+  <div class="sheet-card tall" id="cmpCard">
+    <div id="cmpListView">
+      <h3>Saved Items<button class="link" id="cmpClear">Clear all</button></h3>
+      <input id="cmpSearch" placeholder="Search items or shops" autocomplete="off">
+      <div class="sortrow" id="cmpSort">Sort <button class="chip" data-sort="recent">Recent</button><button class="chip" data-sort="az">A–Z</button><span class="cmplab">Compare ›</span></div>
+      <div id="cmpProds"></div>
+    </div>
+    <div id="cmpItemView" class="hidden">
+      <div class="band"><button class="bb" id="cmpBack" aria-label="Back to saved items">‹</button><b id="cmpName"></b></div>
+      <div class="vin" id="cmpIn"></div>
+      <div id="cmpList"></div>
+      <button class="link" id="cmpDelItem">Delete this item</button>
+    </div>
     <div class="actions"><button id="cmpClose" class="primary">Done</button></div>
   </div>
 </div>
@@ -260,14 +286,22 @@ const S = {
   cActive: LS.get('cactive', null),      // highlighted currency in Custom mode
   cExpr: LS.get('cexpr', '100'),
   padHidden: LS.get('padhidden', false), // keypad slid down
-  saved: LS.get('saved', []),            // starred prices: [{id,item,shop,amount,cur,t}]
-  cmpCur: LS.get('cmpcur', null),        // currency the Compare list is shown in
+  saved: LS.get('saved', []),            // Market mode's starred prices: [{id,item,shop,amount,cur,t}]
+  csaved: LS.get('csaved', []),          // Mine mode's starred prices (kept separately)
+  cmpCur: LS.get('cmpcur', null),        // currency Saved Items are shown in (Market)
+  ccmpCur: LS.get('ccmpcur', null),      // ... and in Mine
+  cmpSort: LS.get('cmpsort', 'recent'),  // Saved Items order: 'recent' or 'az'
   editing: false, loading: false, fresh: true, editId: null, pickFor: null
 };
+// Market and Mine each keep their own saved prices and "View in" currency.
+const savedList = () => S.mode === 'custom' ? S.csaved : S.saved;
+function setSavedList(a) { if (S.mode === 'custom') S.csaved = a; else S.saved = a; }
+const cmpCur = () => S.mode === 'custom' ? S.ccmpCur : S.cmpCur;
+function setCmpCur(c) { if (S.mode === 'custom') S.ccmpCur = c; else S.cmpCur = c; }
 function save() {
   LS.set('mode', S.mode); LS.set('favs', S.favs); LS.set('active', S.active); LS.set('expr', S.expr); LS.set('custom', S.custom);
   LS.set('corder', S.corder); LS.set('cactive', S.cActive); LS.set('cexpr', S.cExpr); LS.set('padhidden', S.padHidden);
-  LS.set('saved', S.saved); LS.set('cmpcur', S.cmpCur);
+  LS.set('saved', S.saved); LS.set('csaved', S.csaved); LS.set('cmpcur', S.cmpCur); LS.set('ccmpcur', S.ccmpCur); LS.set('cmpsort', S.cmpSort);
 }
 
 /* ---------- helpers ---------- */
@@ -458,7 +492,7 @@ function render() {
   document.body.classList.toggle('editing', S.editing);
   $('#modeName').textContent = custom ? 'Mine' : 'Market';
   document.querySelectorAll('#modeMenu [data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
-  document.querySelectorAll('.cmpbtn').forEach(b => { b.textContent = '★ Compare ' + S.saved.length; b.classList.toggle('hidden', !S.saved.length); });
+  document.querySelectorAll('.cmpbtn').forEach(b => { b.textContent = '★ Compare ' + savedList().length; b.classList.toggle('hidden', !savedList().length); });
   document.querySelectorAll('.arrange').forEach(b => { b.textContent = S.editing ? 'Done' : '⇅ Order'; b.classList.toggle('hidden', custom && !S.custom.length); });
   $('#refresh').classList.toggle('hidden', custom);
   $('#status').classList.toggle('hidden', custom);
@@ -776,8 +810,8 @@ function openSave() {
 function renderSaveChips() {
   const chips = (field, names) => names.slice(0, 8).map(n =>
     `<button class="chip${$(field).value.trim().toLowerCase() === n.toLowerCase() ? ' on' : ''}" data-v="${esc(n)}">${esc(n)}</button>`).join('');
-  $('#svItems').innerHTML = chips('#svItem', uniqNames(S.saved.map(x => x.item)));
-  $('#svShops').innerHTML = chips('#svShop', uniqNames(S.saved.map(x => x.shop)));
+  $('#svItems').innerHTML = chips('#svItem', uniqNames(savedList().map(x => x.item)));
+  $('#svShops').innerHTML = chips('#svShop', uniqNames(savedList().map(x => x.shop)));
 }
 [['#svItems', '#svItem'], ['#svShops', '#svShop']].forEach(([box, field]) => {
   $(box).addEventListener('click', ev => { const b = ev.target.closest('.chip'); if (b) { $(field).value = b.dataset.v; renderSaveChips(); } });
@@ -787,40 +821,70 @@ $('#svCancel').addEventListener('click', () => $('#saveSheet').classList.add('hi
 $('#svSave').addEventListener('click', () => {
   if (!pendingSave) return;
   const it = { id: String(Date.now()), item: $('#svItem').value.trim(), shop: $('#svShop').value.trim(), amount: pendingSave.amount, cur: pendingSave.cur, t: Date.now() };
-  S.saved.unshift(it); pendingSave = null;
+  savedList().unshift(it); pendingSave = null;
   save(); $('#saveSheet').classList.add('hidden'); render();
   toast('★ Saved ' + money(it.amount, it.cur) + (it.item ? ' · ' + it.item : ''));
 });
 
-// Compare sheet: same item grouped, cheapest first, all shown in the currency you pick.
+// Saved Items (★ Compare): each mode keeps its own list. The list shows one line per product
+// (search + sort); tapping a product opens its own page comparing the prices, cheapest first.
+let cmpItem = null;   // the product (lower-case name) whose page is open, or null for the list
 function cmpCurrencies() { return S.mode === 'custom' ? S.corder.slice() : S.favs.slice(); }
+function groupSaved() {   // products, most recently saved first
+  const groups = new Map();
+  savedList().forEach(x => { const k = x.item.toLowerCase(); if (!groups.has(k)) groups.set(k, { key: k, items: [] }); groups.get(k).items.push(x); });
+  groups.forEach(g => { g.name = g.items[g.items.length - 1].item || 'No name'; });   // spelling you first typed
+  return [...groups.values()];
+}
 function openCompare() {
-  const list = cmpCurrencies();
-  if (!list.includes(S.cmpCur)) S.cmpCur = S.saved[0] && list.includes(S.saved[0].cur) ? S.saved[0].cur : list[0];
+  const list = cmpCurrencies(), saved = savedList();
+  if (!list.includes(cmpCur())) setCmpCur(saved[0] && list.includes(saved[0].cur) ? saved[0].cur : list[0]);
+  cmpItem = null; $('#cmpSearch').value = '';
   save(); renderCompare();
   $('#cmpSheet').classList.remove('hidden');
 }
 function renderCompare() {
-  const cur = S.cmpCur;
-  $('#cmpIn').innerHTML = 'View in ' + cmpCurrencies().map(c => `<button class="chip${c === cur ? ' on' : ''}" data-c="${c}">${c}</button>`).join('');
-  if (!S.saved.length) { $('#cmpList').innerHTML = '<div class="empty">No saved prices.<br>Type a price, then tap ☆ on the highlighted row to save it here.</div>'; return; }
-  const groups = new Map();   // by item name, ignoring capitals; most recently saved item first
-  S.saved.forEach(x => { const k = x.item.toLowerCase(); if (!groups.has(k)) groups.set(k, { items: [] }); groups.get(k).items.push(x); });
-  groups.forEach(g => { g.name = g.items[g.items.length - 1].item || 'No name'; });   // spelling you first typed
-  const pct = p => p < 1 ? p.toFixed(1) : String(Math.round(p));
-  $('#cmpList').innerHTML = [...groups.values()].map(g => {
-    const rows = g.items.map(x => ({ x, v: modeConvert(x.amount, x.cur, cur) }));
-    const ok = rows.filter(r => isFinite(r.v)).sort((a, b) => a.v - b.v), none = rows.filter(r => !isFinite(r.v));
-    const min = ok.length ? ok[0].v : NaN, n = rows.length;
-    return `<div class="grp"><div class="gh"><b>${esc(g.name)}</b><small>${n} price${n === 1 ? '' : 's'}</small></div>` + ok.concat(none).map(r => {
-      const x = r.x, same = x.cur === cur, conv = isFinite(r.v);
-      let tag = '';
-      if (conv && ok.length > 1) tag = r.v - min < 1e-9 * Math.max(1, min) ? '<span class="badge">Cheapest</span>' : `<span class="more">+${pct((r.v - min) / min * 100)}%</span>`;
-      const main = conv ? (same ? '' : '≈ ') + money(r.v, cur) : '—';
-      const sub = same ? '' : conv ? 'saved ' + money(x.amount, x.cur) : money(x.amount, x.cur) + ' · no ' + (S.mode === 'custom' ? 'Mine' : 'market') + ' rate to ' + cur;
-      return `<div class="gr" data-id="${x.id}"><div class="shop">${esc(x.shop || 'No shop')}<small>${whenText(x.t)}</small></div>${tag}<div class="pr"><b>${main}</b>${sub ? '<small>' + sub + '</small>' : ''}</div><button class="del" data-act="del" aria-label="Delete">✕</button></div>`;
-    }).join('') + '</div>';
+  const item = cmpItem && groupSaved().find(g => g.key === cmpItem);
+  if (cmpItem && !item) cmpItem = null;   // its last price was deleted
+  $('#cmpListView').classList.toggle('hidden', !!cmpItem);
+  $('#cmpItemView').classList.toggle('hidden', !cmpItem);
+  $('#cmpCard').classList.toggle('itemview', !!cmpItem);
+  if (cmpItem) renderItem(item); else renderProducts();
+}
+function renderProducts() {
+  const cur = cmpCur(), q = $('#cmpSearch').value.trim().toLowerCase();
+  document.querySelectorAll('#cmpSort [data-sort]').forEach(b => b.classList.toggle('on', b.dataset.sort === S.cmpSort));
+  let groups = groupSaved();
+  $('#cmpClear').classList.toggle('hidden', !groups.length);
+  $('#cmpSort').classList.toggle('hidden', !groups.length);
+  $('#cmpSearch').classList.toggle('hidden', !groups.length);
+  if (!groups.length) { $('#cmpProds').innerHTML = '<div class="empty">No saved items yet.<br>Type a price, then tap ☆ on the highlighted row to save it here.</div>'; return; }
+  if (q) groups = groups.filter(g => g.name.toLowerCase().includes(q) || g.items.some(x => x.shop.toLowerCase().includes(q)));
+  if (S.cmpSort === 'az') groups.sort((a, b) => a.name.localeCompare(b.name));
+  if (!groups.length) { $('#cmpProds').innerHTML = '<div class="empty">No items match “' + esc(q) + '”.</div>'; return; }
+  $('#cmpProds').innerHTML = groups.map(g => {
+    const conv = g.items.map(x => ({ x, v: modeConvert(x.amount, x.cur, cur) })).filter(r => isFinite(r.v)), n = g.items.length;
+    const best = conv.sort((p, q) => p.v - q.v)[0], vals = conv;
+    const price = best ? (best.x.cur === cur ? '' : '≈ ') + money(best.v, cur) : '—';
+    return `<div class="prod" data-k="${esc(g.key)}"><div class="nm"><b>${esc(g.name)}</b><small>${n} price${n === 1 ? '' : 's'}</small></div>` +
+      `<div class="fr"><small>${n > 1 && vals.length ? 'from' : '&nbsp;'}</small><b>${price}</b></div><span class="chev">›</span></div>`;
   }).join('');
+}
+function renderItem(g) {
+  const cur = cmpCur();
+  $('#cmpName').textContent = g.name;
+  $('#cmpIn').innerHTML = 'View in ' + cmpCurrencies().map(c => `<button class="chip${c === cur ? ' on' : ''}" data-c="${c}">${c}</button>`).join('');
+  const rows = g.items.map(x => ({ x, v: modeConvert(x.amount, x.cur, cur) }));
+  const ok = rows.filter(r => isFinite(r.v)).sort((a, b) => a.v - b.v), none = rows.filter(r => !isFinite(r.v));
+  const min = ok.length ? ok[0].v : NaN, pct = p => p < 1 ? p.toFixed(1) : String(Math.round(p));
+  $('#cmpList').innerHTML = '<div class="rowsonly">' + ok.concat(none).map(r => {
+    const x = r.x, same = x.cur === cur, conv = isFinite(r.v);
+    let tag = '';
+    if (conv && ok.length > 1) tag = r.v - min < 1e-9 * Math.max(1, min) ? '<span class="badge">Cheapest</span>' : `<span class="more">+${pct((r.v - min) / min * 100)}%</span>`;
+    const main = conv ? (same ? '' : '≈ ') + money(r.v, cur) : '—';
+    const sub = same ? '' : conv ? 'saved ' + money(x.amount, x.cur) : money(x.amount, x.cur) + ' · no ' + (S.mode === 'custom' ? 'Mine' : 'market') + ' rate to ' + cur;
+    return `<div class="gr" data-id="${x.id}"><div class="shop">${esc(x.shop || 'No shop')}<small>${whenText(x.t)}</small></div>${tag}<div class="pr"><b>${main}</b>${sub ? '<small>' + sub + '</small>' : ''}</div><button class="del" data-act="del" aria-label="Delete">✕</button></div>`;
+  }).join('') + '</div>';
 }
 // Tap a saved price: put it back on the keypad (in its own currency).
 function loadPrice(x) {
@@ -834,16 +898,26 @@ function loadPrice(x) {
   S.fresh = true; save();
   $('#cmpSheet').classList.add('hidden'); showPad(); render();
 }
-$('#cmpIn').addEventListener('click', ev => { const b = ev.target.closest('[data-c]'); if (b) { S.cmpCur = b.dataset.c; save(); renderCompare(); } });
+$('#cmpSearch').addEventListener('input', renderProducts);
+$('#cmpSort').addEventListener('click', ev => { const b = ev.target.closest('[data-sort]'); if (b) { S.cmpSort = b.dataset.sort; save(); renderProducts(); } });
+$('#cmpProds').addEventListener('click', ev => { const p = ev.target.closest('.prod'); if (p) { cmpItem = p.dataset.k; renderCompare(); $('#cmpList').scrollTop = 0; } });
+$('#cmpBack').addEventListener('click', () => { cmpItem = null; renderCompare(); });
+$('#cmpIn').addEventListener('click', ev => { const b = ev.target.closest('[data-c]'); if (b) { setCmpCur(b.dataset.c); save(); renderCompare(); } });
 $('#cmpList').addEventListener('click', ev => {
   const row = ev.target.closest('.gr'); if (!row) return;
-  const x = S.saved.find(y => y.id === row.dataset.id); if (!x) return;
-  if (ev.target.closest('[data-act="del"]')) { S.saved = S.saved.filter(y => y !== x); save(); renderCompare(); render(); return; }
+  const x = savedList().find(y => y.id === row.dataset.id); if (!x) return;
+  if (ev.target.closest('[data-act="del"]')) { setSavedList(savedList().filter(y => y !== x)); save(); renderCompare(); render(); return; }
   loadPrice(x);
 });
+$('#cmpDelItem').addEventListener('click', () => {
+  const g = groupSaved().find(y => y.key === cmpItem); if (!g) return;
+  if (!confirm(`Delete ${g.name} (${g.items.length} price${g.items.length === 1 ? '' : 's'})?`)) return;
+  setSavedList(savedList().filter(x => x.item.toLowerCase() !== cmpItem)); cmpItem = null;
+  save(); renderCompare(); render();
+});
 $('#cmpClear').addEventListener('click', () => {
-  if (!S.saved.length || !confirm('Delete all saved prices?')) return;
-  S.saved = []; save(); renderCompare(); render();
+  if (!savedList().length || !confirm('Delete all saved items in ' + (S.mode === 'custom' ? 'Mine' : 'Market') + '?')) return;
+  setSavedList([]); save(); renderCompare(); render();
 });
 $('#cmpClose').addEventListener('click', () => $('#cmpSheet').classList.add('hidden'));
 document.querySelectorAll('.cmpbtn').forEach(b => b.addEventListener('click', openCompare));
